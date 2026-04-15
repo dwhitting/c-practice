@@ -44,6 +44,7 @@ int main(void)
             }
             printf("\n");
         }
+        return 0;
 }
 
 /*find_part: looks up by part number*/
