@@ -12,6 +12,12 @@ int main(void)
     printf("str out: %s\n", p);
     printf("%d\n", p[3]);
     
+    free(p);
+
+    int day;
+    scanf("%2d", &day);
+
+    printf("day: %d\n", day);
 
     return 0;
 }
