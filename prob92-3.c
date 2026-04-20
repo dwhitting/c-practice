@@ -15,44 +15,30 @@ struct ListNode {
 };
 
 struct ListNode* reverseBetween(struct ListNode* head, int left, int right) {
-    struct ListNode *prev = NULL, *curr = head, *next = NULL, \
-        *left_node = NULL, *right_node = NULL, *rev_list, *rev_head = NULL, \
-        *rev_tail = NULL;
 
-    int i = 0;
-    while (curr != NULL) {
-        i++;
-        if (i == left -1) {
-            left_node = curr;
-        }
-        if (left == 2 && i == 1)
-            prev = curr;
-            prev->next == NULL;
-        while (i >= left && i <= right) {
-            if (i == left)
-                rev_head = curr;
+    struct ListNode *curr = head, *left_node = head, *next = head, *prev = head, \
+        *begin_node = head;
+    for (int i = 1; i < left; i++) {
+        prev = curr;
+        curr = curr->next;
+    }
+    left_node = prev;
+    begin_node = curr;
+    if (left != right) {
+        for (int i = left; i <= right; i ++) {
             next = curr->next;
             curr->next = prev;
             prev = curr;
             curr = next;
-            i++;
         }
-        
-        if (i == right + 1) {
-            if (curr == NULL)
-                head = prev;
-            else {
-                rev_head->next = curr;
-                if (left_node != NULL)
-                   left_node->next = prev;
-            }
+        begin_node->next = curr;
+        left_node->next = prev;
+    } else head->next = NULL;
 
 
-        }
-        if (curr != NULL)
-            curr = curr->next;
-    }
+    
     return head;
+          
 }
 
 struct ListNode *add_node(struct ListNode *head, int n) {
@@ -71,7 +57,7 @@ int main(void)
         head = add_node(head, i);
     }
 
-    head = reverseBetween(head, 2, 2);
+    head = reverseBetween(head, 1, 1);
 
     while (head != NULL) {
         printf("Num: %d\n", head->val);
