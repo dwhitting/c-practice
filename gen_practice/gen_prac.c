@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <limits.h>
+
+typedef struct {
+    int i;
+    char c[20];
+} my_struct;
 
 int main(void)
 {
-    bool tb = true;
-    int ti = 5;
-    bool sum = ti + tb;
-    unsigned int ui = UINT_MAX;
+    void *p = malloc(16);
+    int *q = (int *)p;
+    q[0] = 5;
 
-    printf("%u\n", ui + 1);
-
-
+    printf("%d\n", q[0]);
 
     return 0;
 }
