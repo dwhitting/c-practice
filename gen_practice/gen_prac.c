@@ -1,12 +1,18 @@
 #include <stdio.h>
-#include "prac_extern_file.h"
+#include <stdlib.h>
+#include <stdbool.h>
+#include <limits.h>
 
 int main(void)
 {
-    int i = test_func();
-    //tI = 55;
+    bool tb = true;
+    int ti = 5;
+    bool sum = ti + tb;
+    unsigned int ui = UINT_MAX;
 
-    printf("output: %d", tI);
+    printf("%u\n", ui + 1);
+
+
 
     return 0;
 }
