@@ -13,10 +13,25 @@ void show_int(int x) {
     show_bytes((byte_pointer) &x, sizeof(int));
 }
 
+void show_float(float x) {
+    show_bytes((byte_pointer) &x, sizeof(float));
+}
+
+void show_pointer(void *x) {
+    show_bytes((byte_pointer) &x, sizeof(void *));
+}
+
 void test_show_bytes(int val) {
     int ival = val;
-
+    int *pval = &ival;
+    float fval = (float) ival;
     show_int(ival);
+    show_float(fval);
+    show_pointer(pval);
+    //show_int(*pval);
+
+    printf("\nsize of void*: %lu\n", sizeof(void *));
+    
 }
 
 int main(void) {
