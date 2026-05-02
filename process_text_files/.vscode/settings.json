@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/parallels/c-practice/process_text_files",
+            "binaryPath": "/home/parallels/c-practice/process_text_files/wfreq",
+            "binaryArgs": ["test2.txt"]
+        }
+    ]
+}
