@@ -13,8 +13,3 @@ long caller(void) {
     long diff = arg1 - arg2;
     return sum * diff;
 }
-
-int main(void)
-{
-    return 0;
-}
