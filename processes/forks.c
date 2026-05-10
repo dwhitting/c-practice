@@ -18,19 +18,19 @@ pid_t Fork(void)
     return pid;
 }
 
-int main(void)
-{
-    pid_t pid;
-    int x = 1;
+// int main(void)
+// {
+//     pid_t pid;
+//     int x = 1;
     
-    pid = Fork();
-    if (pid == 0) { //child
-        printf("child: x=%d\n", ++x);
-        return 0;
-    }
+//     pid = Fork();
+//     if (pid == 0) { //child
+//         printf("child: x=%d\n", ++x);
+//         return 0;
+//     }
 
-    //parent
-    printf("parent: x=%d\n", --x);
+//     //parent
+//     printf("parent: x=%d\n", --x);
 
-    return 0;
-}
+//     return 0;
+// }
