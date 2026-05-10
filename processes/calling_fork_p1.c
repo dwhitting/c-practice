@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <unistd.h>
+
+
+int main(int argc, char *argv[])
+{
+    printf("hello I am (pid:%d)\n", (int) getpid());
+    int rc = fork();
+    if (rc < 0) {
+        fprintf(stderr, "fork failed\n");
+        return 1;
+    } else if (rc == 0 ) { //child of new process
+        printf("hello, I am child (pid:%d)\n", (int) getpid());
+    } else {
+        printf("hello, I am parent of %d (pid:%d)\n", rc, (int) getpid());
+    }
+
+
+    return 0;
+}
