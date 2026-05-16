@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/parallels/c-practice/OSs_Three_Easy_Pieces/threads",
+            "binaryPath": "/home/parallels/c-practice/OSs_Three_Easy_Pieces/threads/main",
+            "binaryArgs": []
+        }
+    ]
+}
