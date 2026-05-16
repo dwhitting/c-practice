@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-void *mythread(void *arg) {
+static void *mythread(void *arg) {
     printf("%s\n", (char *) arg);
     return NULL;
 }

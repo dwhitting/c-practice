@@ -6,8 +6,8 @@ TARGET = main
 # Default rule to build the program
 all: $(TARGET)
 
-$(TARGET): main.c
-	$(CC) $(CFLAGS) main.c -o $(TARGET)
+$(TARGET): main.c thread_0.c thread_1.c
+	$(CC) $(CFLAGS) thread_0.c thread_1.c main.c -o $(TARGET)
 
 # Clean rule to remove compiled binaries
 clean:
