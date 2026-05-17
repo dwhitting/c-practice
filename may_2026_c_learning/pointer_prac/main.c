@@ -3,19 +3,17 @@
 
 int main(void)
 {
-    void *ptr = NULL;
+    char *fruit[] = {
+        "watermelon",
+        "banana",
+        "pear",
+        "apple"
+    };
 
-    int x = 5;
-
-    ptr = &x;
-
-    printf("res: %d\n", *(int *) ptr);
-
-    char ch = 'c';
-    ptr = &ch;
-
-    printf("char: %c\n", *(char *) ptr);
-
+    for (int x = 0; x < 4; x++) {
+        putchar(**(fruit+x));
+        putchar('\n');
+    }
 
 
     return 0;
