@@ -7,7 +7,7 @@ int my_len(char *);
 char *my_get_str(void) {
 
     printf("Enter string: ");
-    char ch;
+    int ch;
     int placer = 0;
     int current_size = INIT_MALLOC;
 
