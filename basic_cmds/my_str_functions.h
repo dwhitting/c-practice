@@ -3,7 +3,7 @@
 
 //#include "my_get_str.h"
 
-void my_get_str(char *, int buff_size);
+char *my_get_str(void);
 int my_len(const char *);
 
 #endif
