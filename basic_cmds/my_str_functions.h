@@ -5,5 +5,6 @@
 
 char *my_get_str(void);
 int my_len(const char *);
+int my_get_char(void);
 
 #endif

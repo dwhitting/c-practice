@@ -3,6 +3,7 @@
 #define INIT_MALLOC 5
 
 int my_len(char *);
+int my_get_char(void);
 
 char *my_get_str(void) {
 
@@ -17,9 +18,9 @@ char *my_get_str(void) {
         return NULL;
     }
 
-    while ((ch = getchar()) != '\n' && ch != EOF) {
+    while ((ch = my_get_char()) != '\n' && ch != EOF) {
 
-        if (placer == current_size -2) {
+        if (placer == current_size -1) {
             current_size = current_size * 2;
             char *temp = realloc(ret_str, current_size * sizeof(char));
             if (temp == NULL) {
@@ -27,7 +28,8 @@ char *my_get_str(void) {
                 free(ret_str);
                 return NULL;
             } else {
-                printf("New size %d\n", current_size);
+                // I had this printf to track when resizes hit
+                //printf("New size %d\n", current_size);
             }
             ret_str = temp;
         }
