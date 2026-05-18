@@ -3,7 +3,10 @@
 
 int main(void)
 {
-    read_from_file();
+    //struct_file_write();
+    //struct_file_read();
+
+    seek_rec();
 
     return 0;
 }
