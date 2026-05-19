@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    bor();
+    tester();
 
 
     return 0;
