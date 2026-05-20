@@ -4,9 +4,7 @@
 
 int main(void)
 {
-    //run_thread_0();
-    //run_thread_1();
-    thread_prac();
+    simple_arg_pass();
 
     return 0;
 }
