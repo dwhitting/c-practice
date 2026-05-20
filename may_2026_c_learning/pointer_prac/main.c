@@ -1,20 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void *void_f(void *arg) {
+    int val = *(int *) arg;
+    val += 5;
+    void *ret = &val;
+    return ret; 
+}
+
 int main(void)
 {
-    char *fruit[] = {
-        "watermelon",
-        "banana",
-        "pear",
-        "apple"
-    };
+    int x = 7;
+    void *p = &x;
+    void *f_ptr = void_f(p);
 
-    for (int x = 0; x < 4; x++) {
-        putchar(**(fruit+x));
-        putchar('\n');
-    }
-
+    printf("ret val: %d\n", *(int *)f_ptr);
 
     return 0;
 }
