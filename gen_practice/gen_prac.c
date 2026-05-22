@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <gnu/libc-version.h>
 
 typedef struct {
     int i;
@@ -8,11 +9,8 @@ typedef struct {
 
 int main(void)
 {
-    void *p = malloc(16);
-    int *q = (int *)p;
-    q[0] = 5;
-
-    printf("%d\n", q[0]);
+    const char *val = gnu_get_libc_version();
+    printf("%s\n", val);
 
     return 0;
 }
