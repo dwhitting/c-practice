@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
 int opening_file(void)
 {
-    char select = 'c';
+    char select = 'a';
     int fd;
 
     switch (select) {
@@ -14,9 +16,10 @@ int opening_file(void)
             fd = open("startup", O_RDONLY);
             if (fd == -1) {
                 printf("failed to open\n");
+                char *s_err = strerror(errno);
+                printf("errno %d, error str: %s\n", errno, s_err);
                 return -1;
             }
-    
             printf("opened R only, %d\n", fd);
             close(fd);
         break;
