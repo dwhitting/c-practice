@@ -4,6 +4,9 @@
 
 int main(int argc, char *argv[])
 {
+    // This project is to imitate some file functions.
+    // the -o file is my_io, so to copy files, use the
+    // command ./my_io copy_file [file 1] [file 2]
 
     if (argc < 2) {
         printf("there needs to be a desired function listed\n");
