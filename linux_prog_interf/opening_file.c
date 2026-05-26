@@ -7,8 +7,10 @@
 
 int opening_file(void)
 {
-    char select = 'a';
+    char select = 'd';
     int fd;
+    #define MAX_READ 20
+    char buffer[MAX_READ + 1];
 
     switch (select) {
         case 'a':
@@ -47,6 +49,20 @@ int opening_file(void)
             printf("opened new or existing write-append, %d\n", fd);
             close(fd);
             
+        break;
+
+        case 'd':
+            ssize_t bytes_read = read(STDIN_FILENO, buffer, MAX_READ);
+            if (bytes_read == -1) {
+                printf("error reading, errno: %d\n", errno);
+                return -1;
+            }
+            buffer[bytes_read] = '\0';
+            printf("read data: %s\n", buffer);
+            for (int i = 0; i < 20; i++)
+                printf("%d ", buffer[i]);
+            printf("\n");
+
         break;
     }
 
