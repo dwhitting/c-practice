@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#define N 1000
+#define N 20000
+#define M 20000
 
 int main(void)
 {
@@ -16,10 +17,17 @@ int main(void)
     // int rand_num = rand();
     // printf("rnd: %d\n", rand_num);
 
-    int arr[N][N];
+    //int arr[N][N];
+    //int (*arr_heap)[M] = malloc(N * sizeof(*arr_heap)); // N rows x M cols; one continiuous block on heap
+    
+    int **arr_heap = malloc(N * sizeof(int *));
+    for (int i = 0; i < N; i++)
+        arr_heap[i] = malloc(M * sizeof(int));
+
+
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
-            arr[i][j] = (rand() % 1000) + 1;
+            arr_heap[i][j] = (rand() % 100) + 1;
 
     int sum = 0;
 
@@ -31,10 +39,10 @@ int main(void)
 
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
-            sum += arr[j][i];
+            sum += arr_heap[j][i];
 
     timespec_get(&ts_2, TIME_UTC);
-    struct tm *t_2 = localtime(&ts_1.tv_sec);
+    struct tm *t_2 = localtime(&ts_2.tv_sec);
     long second_millisec = ts_2.tv_nsec / 1000000;
     printf("sec and millisec 2: %d, %ld\n", t_2->tm_sec, second_millisec);
 
