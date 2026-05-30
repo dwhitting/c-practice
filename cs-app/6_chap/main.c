@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#define N 20000
-#define M 20000
+#define N 1000
+#define M 1000
 
 int main(void)
 {
@@ -39,7 +39,7 @@ int main(void)
 
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
-            sum += arr_heap[j][i];
+            sum += arr_heap[i][j];
 
     timespec_get(&ts_2, TIME_UTC);
     struct tm *t_2 = localtime(&ts_2.tv_sec);
@@ -47,6 +47,10 @@ int main(void)
     printf("sec and millisec 2: %d, %ld\n", t_2->tm_sec, second_millisec);
 
     printf("sum: %d\n", sum);
+
+    for (int i = 0; i < N; i++)
+        free(arr_heap[i]);
+    free(arr_heap);
 
     return 0;
 }
