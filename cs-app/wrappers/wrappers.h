@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 
+int unix_error(char *msg);
 pid_t Fork(void);
 
 #endif
