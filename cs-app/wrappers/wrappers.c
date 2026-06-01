@@ -5,7 +5,7 @@ int unix_error(char *msg) {
     return 0;
 }
 
-void app_error(char *msg) { /* application error */
+int app_error(char *msg) { /* application error */
     fprintf(stderr, "%s\n", msg);
     return 0;
 }
