@@ -25,3 +25,9 @@ char *Fgets(char *ptr, int n, FILE *stream) {
 
     return rptr;
 }
+
+void Kill(pid_t pid, int signum) {
+    int rc;
+    if ((rc = kill(pid, signum)) < 0)
+        unix_error("Kill error");
+}

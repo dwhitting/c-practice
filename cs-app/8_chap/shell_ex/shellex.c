@@ -38,6 +38,7 @@ void eval(char *cmdline) {
         if ((pid = Fork()) == 0) { /* child runs user job */
             if (execve(argv[0], argv, environ) < 0) {
                 printf("%s: Command not found.\n", argv[0]);
+                exit(0);
             }
         } 
 
@@ -56,7 +57,7 @@ void eval(char *cmdline) {
 /* if first arg is a builtin command, run it and return true*/
 int builtin_command(char **argv) {
     if (!strcmp(argv[0], "quit"))   /* quite command */
-        return 0;
+        exit(0);
     if (!strcmp(argv[0], "&"))      /* ignore singleton & */
         return 1;
     
