@@ -1,23 +1,33 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <string.h>
+#define CHARNUM 255
 
-int some_func(void *in_buff) {
-    char *buff;
-    buff = in_buff;
-    buff[0] = 'a';
-    *++buff = 'b';
-    *++buff = '\0';
-    
-
-    return 0;
-}
 
 int main(void)
 {
-    char buff[255];
+    char buff[CHARNUM];
+    char *input;
 
-    some_func(buff);
+    input = fgets(buff, CHARNUM, stdin);
 
-    printf("%s\n", buff);
+    int fd;
+    fd = open("some_file.txt", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR |
+                                S_IWUSR);
+    input[strlen(input) - 1] = '\0';
+    write(fd, buff, strlen(input));
+
+    lseek(fd, 0, SEEK_SET);
+    
+    char buff_2[CHARNUM];
+    int bytes_read;
+    bytes_read = read(fd, buff_2, CHARNUM -1);
+    buff_2[bytes_read] = '\0';
+    printf("output: %s\n", buff_2);
+
+    close(fd);
 
     return 0;
 }
