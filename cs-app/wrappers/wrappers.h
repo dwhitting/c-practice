@@ -18,5 +18,6 @@ int unix_error(char *msg);
 pid_t Fork(void);
 char *Fgets(char *ptr, int n, FILE *stream);
 void Kill(pid_t pid, int signum);
+void *Malloc(size_t size);
 
 #endif

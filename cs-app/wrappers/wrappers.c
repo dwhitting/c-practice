@@ -31,3 +31,11 @@ void Kill(pid_t pid, int signum) {
     if ((rc = kill(pid, signum)) < 0)
         unix_error("Kill error");
 }
+
+void *Malloc(size_t size) {
+    void *p;
+    if ((p = malloc(size)) == NULL) {
+        unix_error("malloc error");
+    }
+    return p;
+}
