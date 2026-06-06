@@ -1,11 +1,13 @@
-#include <stdio.h>
-#include <unistd.h>
+#include "rio.h"
 
 int main(void)
 {
-    printf("(a) for one\n");
+    int n;
+    rio_t rio;
+    char buf[MAXLINE];
 
-    sleep(5);
+    rio_readinitb(&rio, STDIN_FILENO);
+    //while ()
 
     return 0;
 }
