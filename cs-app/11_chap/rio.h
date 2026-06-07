@@ -8,6 +8,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+//#include <arpa/inet.h>
 
 #define RIO_BUFSIZE 8192
 #define MAXLINE 8192

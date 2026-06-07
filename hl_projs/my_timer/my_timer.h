@@ -2,8 +2,10 @@
 #define MY_TIMER_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/random.h>
 #define mins(x) (x / 60)
 #define milli(x) (x / 1000000.0)
 
