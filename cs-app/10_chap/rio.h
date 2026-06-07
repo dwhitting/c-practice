@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #define RIO_BUFSIZE 8192
 #define MAXLINE 8192
@@ -24,5 +26,6 @@ ssize_t rio_writen(int fd, void *usrbuf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
+void Stat(const char *filename, struct stat *buf);
 
 #endif
