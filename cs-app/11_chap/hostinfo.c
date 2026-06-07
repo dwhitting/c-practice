@@ -2,7 +2,8 @@
 
 int main(int argc, char **argv)
 {
-    struct addrinfo *p, *listp, hints;
+    struct addrinfo *p, *listp;
+    struct addrinfo hints;
     char buf[MAXLINE];
     int rc, flags;
 

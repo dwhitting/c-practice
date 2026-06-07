@@ -8,13 +8,15 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <netdb.h>
 //#include <arpa/inet.h>
 
 #define RIO_BUFSIZE 8192
 #define MAXLINE 8192
+#define LISTENQ 1024
+#define SA struct sockaddr
 
 typedef struct {
     int rio_fd;                 /* descriptor for this internal buf */
@@ -31,5 +33,8 @@ void rio_readinitb(rio_t *rp, int fd);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
 void Stat(const char *filename, struct stat *buf);
+int open_clientfd(char *hostname, char *port);
+int open_listenfd(char *port);
+void echo(int connfd);
 
 #endif

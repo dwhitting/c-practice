@@ -130,3 +130,86 @@ void Stat(const char *filename, struct stat *buf) {
     if (stat(filename, buf) < 0)
 	    unix_error("Stat error");
 }
+
+int open_clientfd(char *hostname, char *port) {
+    int clientfd;
+    struct addrinfo hints, *listp, *p;
+
+    /* get a list of potential server addresses */
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_socktype = SOCK_STREAM;        /* open a connection */
+    hints.ai_flags = AI_NUMERICSERV;        /* ... using a numeric port arg */
+    hints.ai_flags |= AI_ADDRCONFIG;        /* recommended for connections */
+    getaddrinfo(hostname, port, &hints, &listp);
+
+    /* walk the list for one that we can successfully connect to */
+    for (p = listp; p; p = p->ai_next) {
+        /* create socket descriptor */
+        if ((clientfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
+            continue;   /* socket failed, try next */
+
+        /* connect to server */
+        if (connect(clientfd, p->ai_addr, p->ai_addrlen) != -1)
+            break;   /* success */
+        close(clientfd);        /* connect failed, try another */
+    }
+
+    /* clean up */
+    freeaddrinfo(listp);
+    if (!p)     /* all connections failed */
+        return -1;
+    else
+        return clientfd; 
+}
+
+int open_listenfd(char *port) {
+    struct addrinfo hints, *listp, *p;
+    int listenfd, optval = 1;
+
+    /* get a list of potential server addresses */
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_socktype = SOCK_STREAM;                /* accept connections */
+    hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;    /* ... on any IP address */
+    hints.ai_flags |= AI_NUMERICSERV;               /* ... using port number */
+    getaddrinfo(NULL, port, &hints, &listp);
+
+    /* walk the list for one that we can bind to */
+    for (p = listp; p; p = p->ai_next) {
+        /* create socket descriptor */
+        if ((listenfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
+            continue;       /* socket failed, try the next */
+
+        /* eliminates "address already in use" error from bind */
+        setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
+                    (const void *)&optval, sizeof(int));
+
+        /* bind the descriptor to the address */
+        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0)
+            break;      /* success */
+        close(listenfd);    /* bidn failed, try the next */
+    }
+
+    /* clean up */
+    freeaddrinfo(listp);
+    if (!p)         /* no address worked */
+        return -1;
+
+    /* make it a listending socket ready to accept connection requests */
+    if (listen(listenfd, LISTENQ) < 0) {
+        close(listenfd);
+        return -1;
+    }
+    return listenfd;
+}
+
+void echo(int connfd) {
+    size_t n;
+    char buf[MAXLINE];
+    rio_t rio;
+
+    rio_readinitb(&rio, connfd);
+    while ((n = rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+        printf("server received %d bytes\n", (int)n);
+        rio_writen(connfd, buf, n);
+    }
+}
