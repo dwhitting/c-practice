@@ -48,7 +48,7 @@ void doit(int fd) {
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio;
 
-    /* reead request line and headers */
+    /* read request line and headers */
     rio_readinitb(&rio, fd);
     rio_readlineb(&rio, buf, MAXLINE);
     printf("request headers:\n");

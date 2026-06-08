@@ -179,14 +179,15 @@ int open_listenfd(char *port) {
         if ((listenfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
             continue;       /* socket failed, try the next */
 
-        /* eliminates "address already in use" error from bind */
+        /* eliminates "address already in use" error from bind, immediate listen on restart
+         * instead of 30 sec delay */
         setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, 
                     (const void *)&optval, sizeof(int));
 
         /* bind the descriptor to the address */
         if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0)
             break;      /* success */
-        close(listenfd);    /* bidn failed, try the next */
+        close(listenfd);    /* bind failed, try the next */
     }
 
     /* clean up */
