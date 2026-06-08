@@ -11,10 +11,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 //#include <arpa/inet.h>
 
 #define RIO_BUFSIZE 8192
 #define MAXLINE 8192
+#define MAXBUF 8192
 #define LISTENQ 1024
 #define SA struct sockaddr
 
