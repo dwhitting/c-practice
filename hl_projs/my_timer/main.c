@@ -46,7 +46,7 @@ int arr_comp(void) {
     long sum = 0;
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
-            sum += arr[col][row];
+            sum += arr[row][col];
         }
     }
     printf("sum: %ld\n", sum);
