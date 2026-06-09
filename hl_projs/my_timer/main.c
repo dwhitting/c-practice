@@ -19,8 +19,8 @@ int main(void)
 }
 
 int arr_comp(void) {
-    int rows = 1000;
-    int cols = 1000;
+    int rows = 10000;
+    int cols = 10000;
 
     int **arr;
     arr = (int **) malloc(rows * sizeof(int *));
@@ -43,13 +43,13 @@ int arr_comp(void) {
         }
     }
 
-    int sum = 0;
+    long sum = 0;
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
-            sum += arr[row][col];
+            sum += arr[col][row];
         }
     }
-    printf("sum: %d\n", sum);
+    printf("sum: %ld\n", sum);
 
     for (int row = 0; row < rows; row++) {
         free(arr[row]);       
