@@ -4,23 +4,23 @@ int arr_comp();
 
 int main(void)
 {
+    srand((unsigned int)time(NULL));
+
     my_timer_t timer;
 
     begin_timer(&timer);
 
-    sleep(2);
-
-    end_timer(&timer);
-
+    //sleep(2);
     arr_comp();
-    
+
+    end_timer(&timer);    
 
     return 0;
 }
 
 int arr_comp(void) {
-    int rows = 100;
-    int cols = 100;
+    int rows = 1000;
+    int cols = 1000;
 
     int **arr;
     arr = (int **) malloc(rows * sizeof(int *));
@@ -37,11 +37,24 @@ int arr_comp(void) {
         }
     }
 
-    
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            arr[row][col] = (rand() % 10) +1;
+        }
+    }
 
-    printf("rand: %d", (rand() % 10) +1);
+    int sum = 0;
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            sum += arr[row][col];
+        }
+    }
+    printf("sum: %d\n", sum);
+
+    for (int row = 0; row < rows; row++) {
+        free(arr[row]);       
+    }
+    free(arr);
 
     return 0;
-
-
 }
