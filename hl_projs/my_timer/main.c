@@ -6,8 +6,8 @@
 int main(void)
 {
     char template[] = "/tmp/tempFileXXXXXX";
-    char cp_input[50] = {0};
-    char read_string[100] = {0};
+    long cp_input = 0;
+    long read_string = 0;
 
     setbuf(stdout, NULL);
     
@@ -19,13 +19,13 @@ int main(void)
     switch (child_pid = fork()) {
         
         case 0:
-            strcpy(cp_input, "child first\n");
-            write(fd, cp_input, strlen(cp_input));
+            cp_input = 5;
+            write(fd, cp_input, sizeof(cp_input));
             exit(0);
         default:  /* parent */
             parent_pid = getpid();
-            strcpy(cp_input, "parent second\n");
-            write(fd, cp_input, strlen(cp_input));
+            cp_input = 6;
+            write(fd, cp_input, sizeof(cp_input));
             wait(NULL);
             
     }
@@ -34,16 +34,18 @@ int main(void)
     lseek(fd, 0, SEEK_SET);
   
     ssize_t bytes_read;
-    char *read_ptr = read_string;
+    //char *read_ptr = read_string;
+    int posit = 0;
     
     while ((bytes_read = read(fd, cp_input, sizeof(cp_input) - 1)) != 0) {
-        cp_input[bytes_read] = '\0';
-        memcpy(read_ptr, cp_input, bytes_read);
-        read_ptr += bytes_read;
+        //cp_input[bytes_read] = '\0';
+        //memcpy(read_ptr, cp_input, bytes_read);
+        //read_ptr += bytes_read;
+        printf("while: %ld\n", cp_input);
     }
     
-    *read_ptr = '\0';
+    //*read_ptr = '\0';
     printf("bytes: %ld\n", strlen(read_string));
-    printf("string: %s\n", read_string);
+    printf("string: %d\n", read_string);
     return 0;    
 }
