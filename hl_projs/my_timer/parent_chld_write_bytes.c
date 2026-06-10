@@ -1,7 +1,7 @@
-#include "my_timer.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdio.h>
 
 int main(void)
 {
@@ -20,12 +20,12 @@ int main(void)
         
         case 0:
             cp_input = 5;
-            write(fd, cp_input, sizeof(cp_input));
+            write(fd, &cp_input, sizeof(cp_input));
             exit(0);
         default:  /* parent */
             parent_pid = getpid();
             cp_input = 6;
-            write(fd, cp_input, sizeof(cp_input));
+            write(fd, &cp_input, sizeof(cp_input));
             wait(NULL);
             
     }
@@ -34,18 +34,15 @@ int main(void)
     lseek(fd, 0, SEEK_SET);
   
     ssize_t bytes_read;
-    //char *read_ptr = read_string;
+    char read_bytes[50];
     int posit = 0;
     
-    while ((bytes_read = read(fd, cp_input, sizeof(cp_input) - 1)) != 0) {
+    while ((bytes_read = read(fd, read_bytes, 8)) != 0) {
         //cp_input[bytes_read] = '\0';
         //memcpy(read_ptr, cp_input, bytes_read);
         //read_ptr += bytes_read;
-        printf("while: %ld\n", cp_input);
+        printf("while: %ld\n", *(long *)read_bytes);
     }
     
-    //*read_ptr = '\0';
-    printf("bytes: %ld\n", strlen(read_string));
-    printf("string: %d\n", read_string);
     return 0;    
 }

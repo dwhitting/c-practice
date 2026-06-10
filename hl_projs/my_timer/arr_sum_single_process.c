@@ -1,19 +1,16 @@
+/* This is to compare the time it takes for two processes to sum a large dynamic
+ * memory array. This file is the single process. */
 #include "my_timer.h"
 
 int arr_comp();
 
 int main(void)
 {
-    srand((unsigned int)time(NULL));
+    /* Since I want to compare the same exact arrays, I left this system randomizer
+     * commented out*/
+    //srand((unsigned int)time(NULL));
 
-    my_timer_t timer;
-
-    begin_timer(&timer);
-
-    //sleep(2);
     arr_comp();
-
-    end_timer(&timer);    
 
     return 0;
 }
@@ -21,7 +18,9 @@ int main(void)
 int arr_comp(void) {
     int rows = 10000;
     int cols = 10000;
+    my_timer_t timer;
 
+    /* make the array */
     int **arr;
     arr = (int **) malloc(rows * sizeof(int *));
     if (arr == NULL) {
@@ -37,6 +36,8 @@ int arr_comp(void) {
         }
     }
 
+    /* fill array with 'random' numbers. Random is in quotes since the seed will always be
+     * the same so my speed test will compare aples to apples. */
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
             arr[row][col] = (rand() % 10) +1;
@@ -44,13 +45,19 @@ int arr_comp(void) {
     }
 
     long sum = 0;
+
+    /* actual times section, which is for only the summing. */
+    begin_timer(&timer);
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
             sum += arr[row][col];
         }
     }
+    end_timer(&timer); 
+
     printf("sum: %ld\n", sum);
 
+    /* free dynamic mem */
     for (int row = 0; row < rows; row++) {
         free(arr[row]);       
     }

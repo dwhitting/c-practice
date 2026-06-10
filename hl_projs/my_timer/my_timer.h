@@ -8,6 +8,8 @@
 #define mins(x) (x / 60)
 #define milli(x) (x / 1000000.0)
 
+/* Custom type to store and hold beginning and ending time within variable declared
+ * in calling function */
 typedef struct __my_timer_t {
     struct timespec t_spec_begin, t_spec_end;
 } my_timer_t; 

@@ -1,0 +1,111 @@
+#include "my_timer.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/file.h>
+#include <string.h>
+
+/* 
+ * This is to time summing the array in two chunks: the first half in a parent
+ * process and the second half in the parent process. 
+ * */
+
+int main(void)
+{
+    int rows = 10000;
+    int cols = 10000;
+
+    /* Just for my file handling learning, I have each process right there chunk of the 
+     * array sum to a temp file, then read and sum them at the end for the final total. */
+    char template[] = "/tmp/tempFileXXXXXX";
+    long cp_input = 0;
+    long read_string = 0;
+    long proc_sum = 0;
+    my_timer_t timer;
+    
+    int fd = mkstemp(template);
+    printf("file name: %s\n", template);
+
+    /* make the array in the same way as I did in the single process file. */
+    int **arr;
+    arr = (int **) malloc(rows * sizeof(int *));
+    if (arr == NULL) {
+        printf("memory allocation failed\n");
+        return 1;
+    }
+
+    for (int i = 0; i < rows; i++) {
+        arr[i] = (int *) malloc(cols * sizeof(int));
+        if (arr[i] == NULL) {
+            printf("memory allocation failed\n");
+            return 1;            
+        }
+    }
+
+    /* fill the same way as in the single process file. */
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            arr[row][col] = (rand() % 10) +1;
+        }
+    }
+
+    pid_t child_pid, parent_pid;
+
+    /* 
+     * begin the timer, fork into parent and child, and have each process (parent and child)
+     * sum their portion and save it to the tempfile 
+     */
+    begin_timer(&timer);
+    switch (child_pid = fork()) {
+        
+        case 0: /* child */
+            for (int row = 0; row < (rows / 2); row++) {
+                for (int col = 0; col < cols; col++) {
+                    proc_sum += arr[row][col];
+                }
+            }
+            /* lock and unlock fd around write to prevent both processes writing
+             * at the same time */
+            flock(fd, LOCK_EX);
+            write(fd, &proc_sum, sizeof(cp_input));
+            flock(fd, LOCK_UN);
+            exit(0);
+        default:  /* parent */
+            parent_pid = getpid();
+            for (int row = (rows / 2); row < rows; row++) {
+                for (int col = 0; col < cols; col++) {
+                    proc_sum += arr[row][col];
+                }
+            }
+            /* lock and unlock fd around write to prevent both processes writing
+             * at the same time */
+            flock(fd, LOCK_EX);
+            write(fd, &proc_sum, sizeof(cp_input));
+            flock(fd, LOCK_UN);
+            wait(NULL);
+            
+    }
+    end_timer(&timer);
+
+    printf("child pid: %d\n", child_pid);
+    printf("parent pid: %d\n", parent_pid);
+    lseek(fd, 0, SEEK_SET);
+  
+    ssize_t bytes_read;
+    char read_bytes[50];
+    int posit = 0;
+    long res_sum = 0;
+    
+    /* read each processes sum and sum those two numbers here */
+    while ((bytes_read = read(fd, read_bytes, 8)) != 0) {
+        res_sum += *(long *)read_bytes;
+    }
+
+    printf("Final sum: %ld\n", res_sum);
+
+    /* free dynaic memeor */
+    for (int row = 0; row < rows; row++)
+        free(arr[row]);
+    free(arr);
+    
+    return 0;    
+}
