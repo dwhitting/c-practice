@@ -5,16 +5,16 @@
 #include <string.h>
 
 /* 
- * This is to time summing the array in two chunks: the first half in a parent
+ * This is to time summing the array in two chunks: the first half in a child
  * process and the second half in the parent process. 
- * */
+ */
 
 int main(void)
 {
     int rows = 10000;
     int cols = 10000;
 
-    /* Just for my file handling learning, I have each process right there chunk of the 
+    /* Just for my file handling learning, I have each process right their chunk of the 
      * array sum to a temp file, then read and sum them at the end for the final total. */
     char template[] = "/tmp/tempFileXXXXXX";
     long cp_input = 0;
@@ -51,8 +51,10 @@ int main(void)
     pid_t child_pid, parent_pid;
 
     /* 
-     * begin the timer, fork into parent and child, and have each process (parent and child)
+     * Begin the timer, fork into parent and child, and have each process (parent and child)
      * sum their portion and save it to the tempfile 
+     * Even with the file writes within the timed block, it is still faster than the single
+     * process version.  Wow!
      */
     begin_timer(&timer);
     switch (child_pid = fork()) {
@@ -102,7 +104,7 @@ int main(void)
 
     printf("Final sum: %ld\n", res_sum);
 
-    /* free dynaic memeor */
+    /* free dynaic memory */
     for (int row = 0; row < rows; row++)
         free(arr[row]);
     free(arr);

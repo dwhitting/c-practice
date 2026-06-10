@@ -1,8 +1,11 @@
-#include "../my_timer/my_timer.h"
+#include "my_timer.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
 #include <errno.h>
+
+/* This version uses a pipe instead of a temp file to see how 
+ * much this could speed things up. */
 
 int main(void)
 {
@@ -37,7 +40,7 @@ int main(void)
         }
     }
 
-    /* fill the array with 'random' numbers */
+    /* fill the array with those 'random' numbers */
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
             arr[row][col] = (rand() % 10) +1;
@@ -79,6 +82,7 @@ int main(void)
 
     printf("Final sum: %ld\n", proc_sum);
 
+    /* free malloc'd stuff */
     for (int row = 0; row < rows; row++)
         free(arr[row]);
     free(arr);
