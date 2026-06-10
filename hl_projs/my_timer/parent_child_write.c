@@ -6,7 +6,7 @@
 int main(void)
 {
     char template[] = "/tmp/tempFileXXXXXX";
-    char cp_input[50] = {0};
+    char test[50] = {0};
     char read_string[100] = {0};
 
     setbuf(stdout, NULL);
@@ -19,13 +19,13 @@ int main(void)
     switch (child_pid = fork()) {
         
         case 0:
-            strcpy(cp_input, "child first\n");
-            write(fd, cp_input, strlen(cp_input));
+            strcpy(test, "child first\n");
+            write(fd, test, strlen(test));
             exit(0);
         default:  /* parent */
             parent_pid = getpid();
-            strcpy(cp_input, "parent second\n");
-            write(fd, cp_input, strlen(cp_input));
+            strcpy(test, "parent second\n");
+            write(fd, test, strlen(test));
             wait(NULL);
             
     }
@@ -36,9 +36,9 @@ int main(void)
     ssize_t bytes_read;
     char *read_ptr = read_string;
     
-    while ((bytes_read = read(fd, cp_input, sizeof(cp_input) - 1)) != 0) {
-        cp_input[bytes_read] = '\0';
-        memcpy(read_ptr, cp_input, bytes_read);
+    while ((bytes_read = read(fd, test, sizeof(test) - 1)) != 0) {
+        test[bytes_read] = '\0';
+        memcpy(read_ptr, test, bytes_read);
         read_ptr += bytes_read;
     }
     
