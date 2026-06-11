@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
+#include <pthread.h>
 //#include <arpa/inet.h>
 
 #define RIO_BUFSIZE 8192
@@ -38,7 +39,7 @@ ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
 void Stat(const char *filename, struct stat *buf);
 int open_clientfd(char *hostname, char *port);
-int open_listenfd(char *port);
+int Open_listenfd(char *port);
 void echo(int connfd);
 
 #endif

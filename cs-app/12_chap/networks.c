@@ -162,7 +162,7 @@ int open_clientfd(char *hostname, char *port) {
         return clientfd; 
 }
 
-int open_listenfd(char *port) {
+int Open_listenfd(char *port) {
     struct addrinfo hints, *listp, *p;
     int listenfd, optval = 1;
 

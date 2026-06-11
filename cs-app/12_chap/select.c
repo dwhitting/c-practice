@@ -20,14 +20,16 @@ int main (int argc, char **argv)
     FD_SET(listenfd, &read_set);        /* add listenfd to read set */
 
     while (1) {
-        read_set = read_set;
+        ready_set = read_set;
         select(listenfd + 1, &ready_set, NULL, NULL, NULL);
         if (FD_ISSET(STDIN_FILENO, &ready_set))
             command();  /* read command line from stdin */
         if (FD_ISSET(listenfd, &ready_set)) {
             clientlen = sizeof(struct sockaddr_storage);
             connfd = accept(listenfd, (SA *)&clientaddr, &clientlen);
+            printf("Connection made, fd: %d\n", connfd);
             echo(connfd);       /* echo cleint input until EOF */
+            printf("Closing fd: %d\n", connfd);
             close(connfd);
         }
     }
