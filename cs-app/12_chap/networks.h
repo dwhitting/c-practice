@@ -15,6 +15,7 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 #include <pthread.h>
+#include <semaphore.h>
 //#include <arpa/inet.h>
 
 #define RIO_BUFSIZE 8192
