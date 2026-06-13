@@ -1,13 +1,20 @@
 #include "wrap.h"
 #include "my_timer.h"
 
+/* custom thread data structure that holds each threads id and 
+ * the sum it computes
+ */
 typedef struct {
     int thrd_id;
     int ret_sum;
 } thread_data_t;
 
+/* moved arr to global so all threads can access it */
 int **arr;
 
+/* thread figures out which 1000 rows it is suming, sums them, 
+ * and puts the resut in the custom thread_data_t structure 
+ */
 void *thread(void *vargp) {
     thread_data_t *data = (thread_data_t *)vargp;
     int begin = data->thrd_id * 1000;
@@ -57,7 +64,8 @@ int main(void)
     }
 
     /* fill array with 'random' numbers. Random is in quotes since the seed will always be
-     * the same so my speed test will compare apples to apples. */
+     * the same so my speed test will compare apples to apples. 
+     */
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < cols; col++) {
             arr[row][col] = (rand() % 10) +1;
