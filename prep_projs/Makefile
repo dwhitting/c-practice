@@ -7,7 +7,7 @@ TARGET = main
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(CFLAGS) wrap.c main.c -o $(TARGET)
+	$(CC) $(CFLAGS) wrap_prox.c main.c -o $(TARGET)
 
 # Clean rule to remove compiled binaries
 clean:
