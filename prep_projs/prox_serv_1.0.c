@@ -3,6 +3,11 @@
 void check_client_connection(struct sockaddr_in *s_addr, int s_len);
 void check_serv_connection(struct addrinfo *res);
 
+/* At this stage, it reads the clients incoming headers (and
+ * anything else the client is sending), and prints them out
+ * to the terminal.
+ */
+
 int main(int argc, char **argv) 
 {
     if (argc != 2) {
@@ -77,35 +82,26 @@ int main(int argc, char **argv)
         rio_readinitb(&rio_p, conn_fd);
         char net_read[MAXLINE];
         int chars_read;
-        char method[MAXLINE];
-        char URL[MAXLINE];
-        char version[MAXLINE];
         
-        chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
-        if (chars_read > 0) {
-            printf("Request Line: %s", net_read);
-            sscanf(net_read, "%s %s %s", method, URL, version);
-            printf("Method: %s, URL: %s, Version: %s", method, URL, version);
-
-            while (1) {
-                chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
-                if (chars_read > 0) {
-                    if (strcmp(net_read, "\r\n") == 0 || strcmp(net_read, "\n") == 0) {
-                        printf("Header block drained.\n");
-                        break;
-                    }
-                } else {
-                    break;      /* trap EOF or error inside drain loop */
+        while (1) {
+            chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
+            if (chars_read > 0) {
+                printf("received %d bytes: %s", chars_read, net_read);   
+                if (strcmp(net_read, "\r\n") == 0 || strcmp(net_read, "\n") == 0) {
+                    printf("Detected end of header. Breaking loop.");
+                    break;
                 }
             }
+            else if (chars_read == 0) {
+                printf("EOF received\n");
+                break;
+            }
+            else {
+                printf("Error reading from client\n");
+                break;
+            }   
+
         }
-        else if (chars_read == 0) {
-            printf("EOF received\n");
-        }
-        else {
-            printf("Error reading from client\n");
-        }   
-        
         close(conn_fd);
         printf("Closed client connection. Back to receive mode...\n");
     }

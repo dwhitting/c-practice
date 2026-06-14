@@ -26,7 +26,6 @@ int Pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 int Pthread_join(pthread_t thread, void **retval);
 ssize_t net_write_n(int fd, char *buf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
-static ssize_t rio_read(rio_t *rp, char *usrbuf, ssize_t n);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 
 #endif

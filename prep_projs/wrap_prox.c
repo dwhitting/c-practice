@@ -43,6 +43,10 @@ void rio_readinitb(rio_t *rp, int fd) {
     rp->rio_bufptr = rp->rio_buf;
 }
 
+/* this creates a buffer to read a big chunk from the network, then let
+ * the byte-by-byte readline read from here, all in user mode.  Otherwise, 
+ * you have to trap the kernel (context switch) for every byte read from
+ * the network, which could lead to a massive performance hit. */
 static ssize_t rio_read(rio_t *rp, char *usrbuf, ssize_t n) {
     ssize_t cnt;
 
