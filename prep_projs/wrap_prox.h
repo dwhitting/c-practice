@@ -12,6 +12,7 @@
 #include <sys/socket.h> // Core socket definitions, structures, and functions
 #include <netdb.h>      // For getaddrinfo, struct addrinfo, and gai_strerror
 #define MAXLINE 8192
+#define LISTENQ 1024
 
 typedef struct {
     int rio_fd;                 /* descriptor for this internal buf */
