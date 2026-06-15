@@ -94,3 +94,34 @@ ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) {
     *bufp = 0;
     return n-1;
 }
+
+void parse_url(char *url, char *host_name, char *tgt_port, char *path_outbound) {
+    /* point to beginning of hostname */
+    char *host_start = strstr(url, "//");
+    if (host_start != NULL) {
+        host_start += 2;
+    } else {
+        host_start = url;  /* there was no http://, so start at beginning of url */
+    }
+
+    /* locate path slash */
+    char *path_start = strchr(host_start, '/');
+    if (path_start != NULL) {
+        strcpy(path_outbound, path_start);
+
+        /* isolate host section */
+        *path_start= '\0';
+        //printf("hs: %s\n", host_start);
+
+        /* isolate port */
+        char *port_start = strchr(host_start, ':');
+        if (port_start != NULL) {
+            strcpy(tgt_port, port_start + 1);
+
+            /* isolate host name */
+            *port_start = '\0';
+            strcpy(host_name, host_start);
+        }
+    }    
+    
+}

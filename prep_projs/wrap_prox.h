@@ -27,5 +27,7 @@ int Pthread_join(pthread_t thread, void **retval);
 ssize_t net_write_n(int fd, char *buf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
+void parse_url(char *url, char *host_name, char *tgt_port, char *path_outbound);
+
 
 #endif

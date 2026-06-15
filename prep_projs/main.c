@@ -77,15 +77,29 @@ int main(int argc, char **argv)
         rio_readinitb(&rio_p, conn_fd);
         char net_read[MAXLINE];
         int chars_read;
+
+        /* http request pieces */
         char method[MAXLINE];
         char URL[MAXLINE];
         char version[MAXLINE];
+
+        /* outbount proxy pieces */
+        char hostname[MAXLINE];
+        char target_port[MAXLINE];
+        char path_outbound[MAXLINE];
         
         chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
         if (chars_read > 0) {
             printf("Request Line: %s", net_read);
             sscanf(net_read, "%s %s %s", method, URL, version);
             printf("Method: %s, URL: %s, Version: %s", method, URL, version);
+
+            if ((strcmp(URL, "/") == 0)) {
+                strcpy(hostname, "127.0.0.1");  /* localhost */
+                strcpy(target_port, port);
+            } else {
+                parse_url(URL, hostname, target_port, path_outbound);
+            }
 
             while (1) {
                 chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
@@ -97,7 +111,7 @@ int main(int argc, char **argv)
                 } else {
                     break;      /* trap EOF or error inside drain loop */
                 }
-            }
+            }            
         }
         else if (chars_read == 0) {
             printf("EOF received\n");
