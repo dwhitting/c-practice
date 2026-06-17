@@ -125,3 +125,28 @@ void parse_url(char *url, char *host_name, char *tgt_port, char *path_outbound) 
     }    
     
 }
+
+void check_client_connection(struct sockaddr_in *s_addr, int s_len) {
+    char client_IP[MAXLINE];
+    char client_port[MAXLINE];
+    int name_stat = getnameinfo((struct sockaddr *) s_addr, s_len, 
+            client_IP, sizeof(client_IP),
+            client_port, sizeof(client_port),
+            NI_NUMERICHOST | NI_NUMERICSERV);
+    if (name_stat == 0)
+        printf("Client IP %s, Port: %s\n", client_IP, client_port);
+}
+
+void check_serv_connection(struct addrinfo *res) {
+    char host_buf[MAXLINE];
+    char serv_buf[MAXLINE];
+    int name_stat;
+    for (struct addrinfo *sngl = res; sngl != NULL; sngl = sngl->ai_next){
+        name_stat = getnameinfo(sngl->ai_addr, sngl->ai_addrlen,
+                host_buf, sizeof(host_buf), 
+                serv_buf, sizeof(serv_buf),
+                NI_NUMERICHOST | NI_NUMERICSERV);
+        if (name_stat == 0)
+            printf("Resolved host: %s, port: %s\n", host_buf, serv_buf);
+    }
+}

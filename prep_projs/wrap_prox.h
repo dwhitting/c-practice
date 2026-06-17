@@ -28,6 +28,8 @@ ssize_t net_write_n(int fd, char *buf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 void parse_url(char *url, char *host_name, char *tgt_port, char *path_outbound);
+void check_client_connection(struct sockaddr_in *s_addr, int s_len);
+void check_serv_connection(struct addrinfo *res);
 
 
 #endif
