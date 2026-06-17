@@ -56,11 +56,11 @@ int main(int argc, char **argv)
 
     /* iterative server loop */
     struct sockaddr_storage client_addr;
-    int conn_fd;
+    int client_fd;
     while (1) {
         socklen_t client_len = sizeof(client_addr);
-        conn_fd = accept(listen_fd,(struct sockaddr *)&client_addr, &client_len);
-        if (conn_fd < 0) {
+        client_fd = accept(listen_fd,(struct sockaddr *)&client_addr, &client_len);
+        if (client_fd < 0) {
             printf("accept failed, attempting next connection\n");
             continue;
         }
@@ -70,8 +70,8 @@ int main(int argc, char **argv)
             check_client_connection(t_addr, client_len);
         }
 
-        rio_t rio_p;
-        rio_readinitb(&rio_p, conn_fd);
+        rio_t rio_client;
+        rio_readinitb(&rio_client, client_fd);
         char net_read[MAXLINE];
         int chars_read;
 
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
         char target_port[MAXLINE];
         char path_outbound[MAXLINE];
         
-        chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
+        chars_read = rio_readlineb(&rio_client, net_read, sizeof(net_read));
         if (chars_read > 0) {
             printf("Request Line: %s", net_read);
             sscanf(net_read, "%s %s %s", method, URL, version);
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
             }
 
             while (1) {
-                chars_read = rio_readlineb(&rio_p, net_read, sizeof(net_read));
+                chars_read = rio_readlineb(&rio_client, net_read, sizeof(net_read));
                 if (chars_read > 0) {
                     if (strcmp(net_read, "\r\n") == 0 || strcmp(net_read, "\n") == 0) {
                         printf("Header block drained.\n");
@@ -108,7 +108,67 @@ int main(int argc, char **argv)
                 } else {
                     break;      /* trap EOF or error inside drain loop */
                 }
-            }            
+            }  
+            
+            /* set up to act as client */
+            struct addrinfo client_hints;
+            memset(&client_hints, 0, sizeof(struct addrinfo));
+            client_hints.ai_family = AF_INET;           /* IPv4 */
+            client_hints.ai_socktype = SOCK_STREAM;     /* TCP */
+
+            /* get addrinfo */
+            struct addrinfo *server_res;
+            status = getaddrinfo(hostname, target_port, &client_hints, &server_res);
+            if (status != 0) {
+                fprintf(stderr, "error in getaddrinfo: %s\n", gai_strerror(status));
+                exit(1);
+            } 
+
+            /* open remote socket */
+            int server_fd = socket(server_res->ai_family, server_res->ai_socktype, server_res->ai_protocol);
+            if (server_fd < 0) {
+                fprintf(stderr, "error opening remote server socket: %d\n", errno);
+                free(server_res);
+                exit(1);
+            } 
+
+            /* connect to remote server */
+            status = connect(server_fd, server_res->ai_addr, server_res->ai_addrlen);
+            if (status < 0) {
+                fprintf(stderr, "error connecting to remote server: %d\n", errno);
+                free(server_res);
+                close(server_fd);
+                exit(1);
+            }
+            free(server_res);
+            printf("connect success\n");
+
+            /* Data pipeline loop */
+            char outbound_request[MAXLINE];
+            memset(outbound_request, 0, sizeof(outbound_request));
+            snprintf(outbound_request, sizeof(outbound_request), "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", path_outbound, hostname);
+            rio_write_n(server_fd, outbound_request, strlen(outbound_request));
+
+            /* initialize robust layer for remote server response */
+            rio_t rio_server;
+            rio_readinitb(&rio_server, server_fd);
+
+            /* stream response back to browser */
+            char server_buf[MAXLINE];
+            while (1) {
+                int bytes_from_web = rio_readnb(&rio_server, server_buf, MAXLINE);
+                if (bytes_from_web > 0) {
+                    rio_write_n(client_fd, server_buf, bytes_from_web);
+                } else if (bytes_from_web == 0) {
+                    /* EOF, remote server finished sending the website */
+                    break;
+                } else {
+                    fprintf(stderr, "error reading website from remote server: %d\n", errno);
+                    exit(1);
+                }
+            }
+
+
         }
         else if (chars_read == 0) {
             printf("EOF received\n");
@@ -117,7 +177,7 @@ int main(int argc, char **argv)
             printf("Error reading from client\n");
         }   
         
-        close(conn_fd);
+        close(client_fd);
         printf("Closed client connection. Back to receive mode...\n");
     }
         

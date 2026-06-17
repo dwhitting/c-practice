@@ -24,8 +24,10 @@ typedef struct {
 int Pthread_create(pthread_t *thread, const pthread_attr_t *attr, 
                     void *(start)(void *), void *vargp); 
 int Pthread_join(pthread_t thread, void **retval);
-ssize_t net_write_n(int fd, char *buf, size_t n);
+ssize_t rio_write_n(int fd, char *buf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
+ssize_t rio_readn(int fd, void *usrbuf, size_t n);
+ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen);
 void parse_url(char *url, char *host_name, char *tgt_port, char *path_outbound);
 void check_client_connection(struct sockaddr_in *s_addr, int s_len);
