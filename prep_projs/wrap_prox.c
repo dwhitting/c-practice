@@ -19,7 +19,7 @@ int Pthread_join(pthread_t thread, void **retval) {
     return ret_val;
 }
 
-ssize_t rio_write_n(int fd, char *buf, size_t n) {
+ssize_t rio_writen(int fd, char *buf, size_t n) {
     size_t nleft = n;
     ssize_t nwritten;
     char *buf_p = buf;

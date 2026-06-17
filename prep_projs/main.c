@@ -91,6 +91,13 @@ int main(int argc, char **argv)
             sscanf(net_read, "%s %s %s", method, URL, version);
             printf("Method: %s, URL: %s, Version: %s", method, URL, version);
 
+            /* safely guard to process only standard GET requests */
+            if (strcmp(method, "GET") != 0) {
+                printf("Detected non-GET method (%s). Dropping connection\n", method);
+                close(client_fd);
+                continue;
+            }
+
             if ((strcmp(URL, "/") == 0)) {
                 strcpy(hostname, "127.0.0.1");  /* localhost */
                 strcpy(target_port, port);
@@ -121,7 +128,7 @@ int main(int argc, char **argv)
             status = getaddrinfo(hostname, target_port, &client_hints, &server_res);
             if (status != 0) {
                 fprintf(stderr, "error in getaddrinfo: %s\n", gai_strerror(status));
-                exit(1);
+                continue;
             } 
 
             /* open remote socket */
@@ -129,7 +136,7 @@ int main(int argc, char **argv)
             if (server_fd < 0) {
                 fprintf(stderr, "error opening remote server socket: %d\n", errno);
                 free(server_res);
-                exit(1);
+                continue;
             } 
 
             /* connect to remote server */
@@ -138,7 +145,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, "error connecting to remote server: %d\n", errno);
                 free(server_res);
                 close(server_fd);
-                exit(1);
+                continue;
             }
             free(server_res);
             printf("connect success\n");
@@ -147,7 +154,7 @@ int main(int argc, char **argv)
             char outbound_request[MAXLINE];
             memset(outbound_request, 0, sizeof(outbound_request));
             snprintf(outbound_request, sizeof(outbound_request), "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", path_outbound, hostname);
-            rio_write_n(server_fd, outbound_request, strlen(outbound_request));
+            rio_writen(server_fd, outbound_request, strlen(outbound_request));
 
             /* initialize robust layer for remote server response */
             rio_t rio_server;
@@ -156,18 +163,25 @@ int main(int argc, char **argv)
             /* stream response back to browser */
             char server_buf[MAXLINE];
             while (1) {
-                int bytes_from_web = rio_readnb(&rio_server, server_buf, MAXLINE);
+                int bytes_from_web = rio_readn(server_fd, server_buf, MAXLINE);
                 if (bytes_from_web > 0) {
-                    rio_write_n(client_fd, server_buf, bytes_from_web);
+                    rio_writen(client_fd, server_buf, bytes_from_web);
                 } else if (bytes_from_web == 0) {
                     /* EOF, remote server finished sending the website */
                     break;
                 } else {
-                    fprintf(stderr, "error reading website from remote server: %d\n", errno);
-                    exit(1);
+                /* If the system call was just interrupted by the OS, try again! */
+                if (errno == EINTR) {
+                    continue; 
+                }
+        
+                /* For a genuine socket error, log it, close up shop, and keep the server alive */
+                fprintf(stderr, "error reading website from remote server: %d\n", errno);
+                break;
                 }
             }
 
+            close(server_fd);
 
         }
         else if (chars_read == 0) {

@@ -24,7 +24,7 @@ typedef struct {
 int Pthread_create(pthread_t *thread, const pthread_attr_t *attr, 
                     void *(start)(void *), void *vargp); 
 int Pthread_join(pthread_t thread, void **retval);
-ssize_t rio_write_n(int fd, char *buf, size_t n);
+ssize_t rio_writen(int fd, char *buf, size_t n);
 void rio_readinitb(rio_t *rp, int fd);
 ssize_t rio_readn(int fd, void *usrbuf, size_t n);
 ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n);
