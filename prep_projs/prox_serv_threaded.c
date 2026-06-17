@@ -1,5 +1,15 @@
 #include "wrap_prox.h"
 
+/* Multi-thread Proxy Server
+ * I plan to have this as the final stage for this iteration
+ * of proxy server projects.  It now spins up thread for 
+ * each client connection 
+ */
+
+ /* struct that will be malloc'd so each thread has it's own data.
+  * most significantly, this ensures each one has a unique client
+  * file descripter so the thread to step on each other's descripters 
+  */
 typedef struct {
     int client_fd;
     char port[100];
@@ -15,6 +25,7 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    /* Using this as an index to track individual threads */
     int thread_track = 0;
 
     /* open port to listen for clients */
@@ -81,6 +92,9 @@ int main(int argc, char **argv)
             check_client_connection(t_addr, client_len);
         }
 
+        /* Here is where each thread is created and passed to the
+         * function: proxy_thread 
+         */
         thread_track++;
         pthread_t tid;
         prox_thread_data_t *next_thread = malloc(sizeof(prox_thread_data_t));
@@ -96,16 +110,22 @@ int main(int argc, char **argv)
         
     }
         
+    /* clean up listening port */
     close(listen_fd);
     printf("Port closed\n");
     
     return 0;
 }
 
-
+/* Worker function for each thread 
+ * Each return in this function kills a thread since they are detached.
+ * I have a printf to show which one is being killed to track that 
+ */
 void *proxy_thread(void *vargp) {
 
+    /* de-ref vargp to usable data */
     prox_thread_data_t data_in = *(prox_thread_data_t *)vargp;
+
     /* freeing malloc'd struct so it doesn't leak, since copied to this stack */
     free(vargp);
     int client_fd = data_in.client_fd;
