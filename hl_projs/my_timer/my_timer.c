@@ -36,5 +36,9 @@ void end_timer(my_timer_t *in_timer) {
     long secs = secs_diff % 60;
     float millis = (float)nsec_diff / 1000000.0f;
 
+    in_timer->min_data = mins;
+    in_timer->sec_data = secs;
+    in_timer->milli_data = millis;
+
     printf("Mins: %ld, secs: %ld, millis: %.2f\n", mins, secs, millis);
 }

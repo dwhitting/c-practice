@@ -12,6 +12,9 @@
  * in calling function */
 typedef struct __my_timer_t {
     struct timespec t_spec_begin, t_spec_end;
+    long min_data;
+    long sec_data;
+    float milli_data;
 } my_timer_t; 
 
 void begin_timer(my_timer_t *in_timer);
