@@ -6,6 +6,8 @@
 #include <string.h>
 #include "../hl_projs/my_timer/my_timer.h"
 
+int trad_file_write(void);
+int trade_file_read(void);
 int shm_write(void);
 int shm_read(void);
 
@@ -14,10 +16,54 @@ int main(void)
     my_timer_t timer;
     begin_timer(&timer);
 
-    shm_write();
-    shm_read();
+    // shm_write();
+    // shm_read();
+
+    
+
+    trad_file_write();
+    trade_file_read();
 
     end_timer(&timer);
+
+    return 0;
+}
+
+int trad_file_write(void) {
+    char *path = "./data";
+    int fd;
+    if ((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0664)) == -1) {
+        perror("file open error");
+        exit(1);
+    }
+
+    for (int i = 0; i < 1000; i++) {
+        write(fd, &i, sizeof(int));
+    }
+    
+    close(fd);
+
+    return 0;
+}
+
+int trade_file_read(void) {
+    char *path = "./data";
+    int fd;
+    if ((fd = open(path, O_RDONLY)) == -1) {
+        perror("file open error");
+        exit(1);
+    }
+
+    int read_num;
+    int arr[1000], cntr = 0;
+    while (read(fd, &read_num, sizeof(int)) != 0) {
+        arr[cntr] = cntr;
+        cntr++;
+    }
+
+    printf("%d\n", arr[955]);
+
+    close(fd);
 
     return 0;
 }
