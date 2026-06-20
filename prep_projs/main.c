@@ -6,6 +6,8 @@
 #include <string.h>
 #include "../hl_projs/my_timer/my_timer.h"
 
+int mkstemp_write(char *file_name);
+int mkstemp_read(char *file_name);
 int trad_file_write(void);
 int trade_file_read(void);
 int shm_write(void);
@@ -16,15 +18,57 @@ int main(void)
     my_timer_t timer;
     begin_timer(&timer);
 
-    // shm_write();
-    // shm_read();
+    shm_write();
+    shm_read();    
 
-    
+    // trad_file_write();
+    // trade_file_read();
 
-    trad_file_write();
-    trade_file_read();
+    // char temp_file[100];
+    // mkstemp_write(temp_file);
+    // mkstemp_read(temp_file);
 
     end_timer(&timer);
+
+    return 0;
+}
+
+int mkstemp_write(char *file_name) {
+    char temp_file[] = "/tmp/my_tempXXXXXX";
+
+    int fd = mkstemp(temp_file);
+    if (fd == -1) {
+        perror("failed mktemp open");
+        exit(1);
+    }
+
+    strcpy(file_name, temp_file);
+    
+    for (int i = 0; i < 1000; i++) {
+        write(fd, &i, sizeof(int));
+    }    
+    
+    close(fd);
+    return 0;
+}
+
+int mkstemp_read(char *file_name) {
+    int fd = open(file_name, O_RDONLY);
+    if (fd == -1) {
+        perror("open file for read error");
+        exit(1);
+    }
+
+    int arr[1000], cntr = 0, read_num;
+    while (read(fd, &read_num, sizeof(int)) != 0) {
+        arr[cntr] = cntr;
+        cntr++;
+    }
+
+    printf("output: %d\n", arr[995]);
+
+    unlink(file_name);
+    close(fd);
 
     return 0;
 }
@@ -70,7 +114,7 @@ int trade_file_read(void) {
 
 int shm_write(void) {
     const char *name = "/my_shm_region";
-    const int SHM_SIZE = 4096;
+    const unsigned long SHM_SIZE = 4096;
 
     int shm_fd = shm_open(name, O_CREAT | O_RDWR | O_TRUNC, 0666);
     if (shm_fd < 0) {
@@ -86,11 +130,11 @@ int shm_write(void) {
 
     int arr[1000];
     for (int i = 0; i < 1000; i++) {
-        arr[i] = i * 2;
+        arr[i] = i;
     }
 
     char *base_ptr = (char *)ptr;
-    int offset = 0;
+    unsigned long offset = 0;
     for (int i = 0; i < 1000; i++) {
         if (offset + sizeof(int) <= SHM_SIZE) {
             memcpy(base_ptr + offset, &arr[i], sizeof(int));
@@ -111,7 +155,7 @@ int shm_write(void) {
 
 int shm_read(void) {
     const char *name = "/my_shm_region";
-    const int SHM_SIZE = 4096;
+    const unsigned long SHM_SIZE = 4096;
 
     int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
     if (shm_fd < 0) {
@@ -127,7 +171,7 @@ int shm_read(void) {
 
     int arr[1000];
     char *base_ptr = (char *)ptr;
-    int offset = 0;
+    unsigned long offset = 0;
     for (int i = 0; i < 1000; i++) {
         if (offset + sizeof(int) <= SHM_SIZE) {
             memcpy(&arr[i], base_ptr + offset, sizeof(int));
