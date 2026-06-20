@@ -18,7 +18,7 @@ int main(void)
 {
     ret_data_t final_data;
     float sum = 0;
-    int runs = 5;
+    int runs = 10;
 
     for (int i = 0; i < runs; i++) {
         final_data = single_run();
