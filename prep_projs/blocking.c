@@ -60,7 +60,7 @@ int matrix_multiply_unblocked(int A[N][N], int B[N][N], int C[N][N]) {
 }
 
 int matrix_mulitply_blocked(int A[N][N], int B[N][N], int C[N][N]) {
-    for (int i = 0; i < N; i += BLOCK_SIZE) {
+    for (int i = 0; i< N; i += BLOCK_SIZE) {
         for (int j = 0; j < N; j += BLOCK_SIZE) {
             for (int k = 0; k < N; k += BLOCK_SIZE) {
                 for (int i_b = i; i_b < i + BLOCK_SIZE; i_b++) {
