@@ -74,5 +74,14 @@ int matrix_mulitply_blocked(int A[N][N], int B[N][N], int C[N][N]) {
         }
     }
 
-    return 0;
+    printf("read from shm: %d\n", arr[995]);
+
+    if (munmap(ptr, SHM_SIZE) == -1)
+        perror("munmap failed");
+
+    close(shm_fd);
+    // if (shm_unlink("/my_shm_region") == -1)
+    //     perror("shm unlink failed");
+
+    return 0;   
 }
