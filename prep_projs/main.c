@@ -1,87 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "../hl_projs/my_timer/my_timer.h"
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
 
-#define N 1024
-#define BLOCK_SIZE 64
-
-/* 1024 took 36 sec, 722 ms */
-
-int matrix_multiply_unblocked(int A[N][N], int B[N][N], int C[N][N]);
-int matrix_mulitply_blocked(int A[N][N], int B[N][N], int C[N][N]);
-
+#define GB (1UL << 30)
 
 int main(void) 
 {
-    my_timer_t timer;
+    size_t alloc_size = GB;
 
-    int (*A)[N] = malloc(N * sizeof(*A));
-    if (A == NULL) {
-        perror("A malloc fail");
-        exit(1);
-    }
-    int (*B)[N] = malloc(N * sizeof(*B));
-    if (B == NULL) {
-        perror("A malloc fail");
-        exit(1);
-    }
-    int (*C)[N] = malloc(N * sizeof(*C));
-    if (C == NULL) {
-        perror("A malloc fail");
+    int *arr = mmap(0, alloc_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (arr == MAP_FAILED) {
+        perror("mmap failed");
         exit(1);
     }
 
-    begin_timer(&timer);
+    pid_t pid; 
+    if ((pid = fork()) == -1) {
+        perror("for error");
+        exit(1);
+    } else if (pid == 0) {
+        printf("in child\n");
+        arr[3] = 5;
+        for (int i = 0; i < 5; i++) {
+            printf("%d\n", arr[i]);
+        }
+        _exit(0);
+    }
 
-    matrix_mulitply_blocked(A, B, C);
+    int stat;
+    wait(&stat);
 
-    end_timer(&timer);
+    printf("after fork, stat: %d\n", stat);
+    printf("This pid is %d\n", getpid());
 
-    free(C);
-    free(B);
-    free(A);
+    if (WIFEXITED(stat)) {
+        int exit_status = WEXITSTATUS(stat);
+        printf("Proc <%d> ended with status: %d\n", pid, exit_status);
+    }
+
+    size_t div_mem = alloc_size / 4;
+    printf("divmem: %lu\n", div_mem);
+
+    arr[268435455] = 3;
+    for (int i = 0; i < 5; i++) {
+        printf("%d\n", arr[i]);
+    }
+
+    printf("far el: %d\n", arr[3]);
+
+    printf("size: %lu\n", sizeof(arr));
+
+    
+    if (munmap(arr, alloc_size) == -1){
+        perror("unmap error");
+        exit(1);
+    }
+
 
     return 0;
-}
-
-int matrix_multiply_unblocked(int A[N][N], int B[N][N], int C[N][N]) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            C[i][j] = 0;
-             for (int k = 0; k < N; k++) {
-                C[i][j] += A[i][k] * B[k][j];
-             }
-        }
-    }
-
-
-    return 0;
-}
-
-int matrix_mulitply_blocked(int A[N][N], int B[N][N], int C[N][N]) {
-    for (int i = 0; i < N; i += BLOCK_SIZE) {
-        for (int j = 0; j < N; j += BLOCK_SIZE) {
-            for (int k = 0; k < N; k += BLOCK_SIZE) {
-                for (int i_b = i; i_b < i + BLOCK_SIZE; i_b++) {
-                    for (int k_b = k; k_b < k + BLOCK_SIZE; k_b++) {
-                        for (int j_b = j; j_b < j + BLOCK_SIZE; j_b++) {
-                            C[i_b][j_b] += A[i_b][k_b] * B[k_b][j_b];
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    printf("read from shm: %d\n", arr[995]);
-
-    if (munmap(ptr, SHM_SIZE) == -1)
-        perror("munmap failed");
-
-    close(shm_fd);
-    // if (shm_unlink("/my_shm_region") == -1)
-    //     perror("shm unlink failed");
-
-    return 0;   
 }
