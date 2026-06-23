@@ -1,64 +1,47 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/wait.h>
-
-#define GB (1UL << 30)
+#include "stan_hdr.h"
+#include <termios.h>
+#include <errno.h>
 
 int main(void) 
 {
-    size_t alloc_size = GB;
-
-    int *arr = mmap(0, alloc_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (arr == MAP_FAILED) {
-        perror("mmap failed");
-        exit(1);
-    }
-
-    pid_t pid; 
-    if ((pid = fork()) == -1) {
-        perror("for error");
-        exit(1);
-    } else if (pid == 0) {
-        printf("in child\n");
-        arr[3] = 5;
-        for (int i = 0; i < 5; i++) {
-            printf("%d\n", arr[i]);
-        }
-        _exit(0);
-    }
-
-    int stat;
-    wait(&stat);
-
-    printf("after fork, stat: %d\n", stat);
-    printf("This pid is %d\n", getpid());
-
-    if (WIFEXITED(stat)) {
-        int exit_status = WEXITSTATUS(stat);
-        printf("Proc <%d> ended with status: %d\n", pid, exit_status);
-    }
-
-    size_t div_mem = alloc_size / 4;
-    printf("divmem: %lu\n", div_mem);
-
-    arr[268435455] = 3;
-    for (int i = 0; i < 5; i++) {
-        printf("%d\n", arr[i]);
-    }
-
-    printf("far el: %d\n", arr[3]);
-
-    printf("size: %lu\n", sizeof(arr));
-
+    struct termios newTerm, prevTerm;
     
-    if (munmap(arr, alloc_size) == -1){
-        perror("unmap error");
-        exit(1);
+    int fd = STDIN_FILENO, bytes_read;
+
+    if (tcgetattr(fd, &newTerm) == -1)
+        stan_err("tcgetattr fail");
+    prevTerm = newTerm;
+
+    newTerm.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(fd, TCSANOW, &newTerm);
+    char ch;
+
+    while (1) {
+        bytes_read = read(STDIN_FILENO, &ch, 1);
+        if (bytes_read == -1) {
+            if (errno == EINTR) {
+                printf("\nRead sig interupt. Resuming...\n");
+                continue;
+            } else {
+                perror("read char error");
+                break;
+            }
+        }
+        if (bytes_read == 0) {
+            printf("EOF detected...\n");
+            break;
+        }
+
+        printf("pressed %c, ", ch);
+        fflush(stdout);
+
+        if (ch == 'q') {
+            break;
+        }
     }
 
+    tcsetattr(STDIN_FILENO, TCSANOW, &prevTerm);
+    printf("\nterminal restored\n");
 
     return 0;
 }

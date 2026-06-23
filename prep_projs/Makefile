@@ -7,7 +7,7 @@ TARGET = main
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(CFLAGS) main.c -o $(TARGET)
+	$(CC) $(CFLAGS) stan_hdr.c main.c -o $(TARGET)
 
 # Clean rule to remove compiled binaries
 clean:
