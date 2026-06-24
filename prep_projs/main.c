@@ -1,47 +1,30 @@
-#include "stan_hdr.h"
-#include <termios.h>
-#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main(void) 
-{
-    struct termios newTerm, prevTerm;
-    
-    int fd = STDIN_FILENO, bytes_read;
+int main() {
+    printf("Attempting to open a new terminal window...\n");
 
-    if (tcgetattr(fd, &newTerm) == -1)
-        stan_err("tcgetattr fail");
-    prevTerm = newTerm;
+    // Option 1: gnome-terminal (Common in Ubuntu/Debian)
+    // The '&' at the end runs it in the background so your C program isn't blocked.
+    int result = system("gnome-terminal &");
 
-    newTerm.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(fd, TCSANOW, &newTerm);
-    char ch;
-
-    while (1) {
-        bytes_read = read(STDIN_FILENO, &ch, 1);
-        if (bytes_read == -1) {
-            if (errno == EINTR) {
-                printf("\nRead sig interupt. Resuming...\n");
-                continue;
-            } else {
-                perror("read char error");
-                break;
-            }
-        }
-        if (bytes_read == 0) {
-            printf("EOF detected...\n");
-            break;
-        }
-
-        printf("pressed %c, ", ch);
-        fflush(stdout);
-
-        if (ch == 'q') {
-            break;
-        }
+    // Option 2: If gnome-terminal fails, try xterm (universal fallback)
+    if (result != 0) {
+        printf("gnome-terminal not found. Trying xterm...\n");
+        result = system("xterm &");
     }
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &prevTerm);
-    printf("\nterminal restored\n");
+    // Option 3: Try konsole (Common in KDE environments)
+    if (result != 0) {
+        printf("xterm not found. Trying konsole...\n");
+        result = system("konsole &");
+    }
+
+    if (result == 0) {
+        printf("Terminal opened successfully!\n");
+    } else {
+        printf("Failed to open a terminal. Please ensure gnome-terminal, xterm, or konsole is installed.\n");
+    }
 
     return 0;
 }
