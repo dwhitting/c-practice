@@ -1,29 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 int main() {
-    printf("Attempting to open a new terminal window...\n");
+    
+    pid_t pid;
+    if ((pid = fork()) < 0) {
+        perror("fork failed");
+        exit(1);
+    } else if (pid == 0) {
+        char *args[] = {"tmux", "split-window", "-h", "top", NULL};
+        execvp(args[0], args);
 
-    // Option 1: gnome-terminal (Common in Ubuntu/Debian)
-    // The '&' at the end runs it in the background so your C program isn't blocked.
-    int result = system("gnome-terminal &");
-
-    // Option 2: If gnome-terminal fails, try xterm (universal fallback)
-    if (result != 0) {
-        printf("gnome-terminal not found. Trying xterm...\n");
-        result = system("xterm &");
-    }
-
-    // Option 3: Try konsole (Common in KDE environments)
-    if (result != 0) {
-        printf("xterm not found. Trying konsole...\n");
-        result = system("konsole &");
-    }
-
-    if (result == 0) {
-        printf("Terminal opened successfully!\n");
-    } else {
-        printf("Failed to open a terminal. Please ensure gnome-terminal, xterm, or konsole is installed.\n");
+        perror("execvp failed");
+        exit(1);
     }
 
     return 0;
