@@ -16,7 +16,7 @@ int main() {
         }
     }
     
-   
+   bnk_accts_exit();
 
     return 0;
 }

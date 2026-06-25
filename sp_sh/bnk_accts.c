@@ -2,11 +2,14 @@
 
 static bnk_acct_t *accts_ll = NULL;
 
+static int delete_acct(void);
 static int add_acct(void);
 static bnk_acct_t *new_acct(void);
 static void list_accts(void);
 static int save_bnk_accts(void);
 static int load_bnk_accts(void);
+static int free_bnk_accts(void);
+static int num_ll(void);
 
 int bnk_acct_main(void) {
 
@@ -15,6 +18,7 @@ int bnk_acct_main(void) {
     while (1) {
         printf("\nAccounts Menu:\n");
         printf("(a) add acct\n");
+        printf("(d) delete acct\n");
         printf("(l) list accts\n");
         printf("(o) load bnk accts\n");
         printf("(s) save\n");
@@ -22,6 +26,9 @@ int bnk_acct_main(void) {
         char ch = single_char_input();
         if (ch == 'a') {
             add_acct();
+        }
+        if (ch == 'd') {
+            delete_acct();
         }
         if (ch == 'l') {
             list_accts();
@@ -40,6 +47,60 @@ int bnk_acct_main(void) {
     return 0;
 }
 
+static int delete_acct(void) {
+    
+    int total_nodes = num_ll();
+    if (total_nodes == 0) {
+        printf("\nNo accts to remove\n");
+        return 0;
+    }
+
+    list_accts();
+    printf("Enter number to remove: ");
+    char ch = 'a';
+    while (!isdigit(ch)) {
+        ch = single_char_input();
+    }
+    int rem_line = ch - '0';
+
+    if (rem_line < 1 || rem_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
+    if (rem_line == 1) {
+        bnk_acct_t *head = accts_ll;
+        accts_ll = accts_ll->next_acct;
+        free(head);
+        printf("\nRemoved first acct\n");
+        return 0;
+    } 
+    
+    bnk_acct_t *prev = NULL;
+    bnk_acct_t *curr = accts_ll;
+
+    for (int i = 1; i < rem_line; i++) {
+        prev = curr;
+        curr = curr->next_acct;
+    }
+    prev->next_acct = curr->next_acct;
+    free(curr); 
+
+    printf("\nAcct removed\n");
+
+    return 0;
+}
+
+static int num_ll(void) {
+    int cnt = 0;
+    bnk_acct_t *curr = accts_ll;
+    while (curr != NULL) {
+        cnt++;
+        curr = curr->next_acct;
+    }
+    return cnt;
+}
+
 static bnk_acct_t *new_acct(void) {
     bnk_acct_t *new_a = (bnk_acct_t *)malloc(sizeof(bnk_acct_t));
     strcpy(new_a->name, "<no name>");
@@ -50,9 +111,10 @@ static bnk_acct_t *new_acct(void) {
 
 static void list_accts(void) {
     bnk_acct_t *curr = accts_ll;
+    int idx = 1;
     printf("\n");
     while (curr != NULL) {
-        printf("Acct: %s, bal: $%.2f\n", curr->name, curr->balance);
+        printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         curr = curr->next_acct;
     }
     printf("\n");
@@ -118,7 +180,7 @@ static int load_bnk_accts(void) {
         
     }
 
-    accts_ll = NULL;
+    free_bnk_accts();
     bnk_acct_t *curr_node = NULL;
     ssize_t bytes_read;
     size_t struct_size = sizeof(bnk_acct_t);
@@ -162,4 +224,24 @@ static int load_bnk_accts(void) {
 
     return 0;
 
+}
+
+static int free_bnk_accts(void) {
+    bnk_acct_t *prev = NULL;
+    bnk_acct_t *curr = accts_ll;
+
+    while (curr != NULL) {
+        prev = curr;
+        curr = curr->next_acct;
+        free(prev);
+    }
+    
+    accts_ll = NULL;
+
+    return 0;
+}
+
+int bnk_accts_exit(void) {
+    free_bnk_accts();
+    return 0;
 }

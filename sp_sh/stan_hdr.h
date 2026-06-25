@@ -8,6 +8,7 @@
 #include <termios.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #define ACCT_NAME_LEN 100
 
@@ -21,5 +22,6 @@ int stan_err(char * in_str);
 char single_char_input(void);
 
 int bnk_acct_main(void);
+int bnk_accts_exit(void);
 
 #endif
