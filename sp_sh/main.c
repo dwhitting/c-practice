@@ -1,8 +1,7 @@
 #include "stan_hdr.h"
 
 int main() {
-    bnk_acct_t *bnk_list = NULL; // = malloc(sizeof(bnk_acct_t));
-    load_bnk_accts(bnk_list);
+    load_bnk_accts();
 
     while (1) {
         
@@ -14,7 +13,7 @@ int main() {
         if (ch == 'q') {
             break;
         } else if (ch == 'b') {
-            bnk_acct_main(bnk_list);
+            bnk_acct_main();
         }
     }
     

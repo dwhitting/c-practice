@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <errno.h>
+#include <string.h>
 
 #define ACCT_NAME_LEN 100
 
@@ -19,7 +20,7 @@ typedef struct _bnk_acct_t {
 int stan_err(char * in_str);
 char single_char_input(void);
 
-int bnk_acct_main(bnk_acct_t *list_head);
-int load_bnk_accts(bnk_acct_t *list_head);
+int bnk_acct_main(void);
+int load_bnk_accts(void);
 
 #endif
