@@ -21,6 +21,5 @@ int stan_err(char * in_str);
 char single_char_input(void);
 
 int bnk_acct_main(void);
-int load_bnk_accts(void);
 
 #endif

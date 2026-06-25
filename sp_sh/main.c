@@ -1,7 +1,6 @@
 #include "stan_hdr.h"
 
 int main() {
-    load_bnk_accts();
 
     while (1) {
         
