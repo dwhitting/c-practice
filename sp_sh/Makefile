@@ -1,14 +1,23 @@
 # Variables
 CC = gcc
 CFLAGS = -Wall -Wextra -g -pthread 
+DEPS = stan_hdr.h 
+OBJS = main.o stan_hdr.o bnk_accts.o
 TARGET = main
 
 # Default rule to build the program
 all: $(TARGET)
 
-$(TARGET): main.c
-	$(CC) $(CFLAGS) bnk_accts.c stan_hdr.c main.c -o $(TARGET)
+# 1. The Target depends on all the object (.o) files, not just main.c
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-# Clean rule to remove compiled binaries
+# 2. Rule to compile each .c file into a .o file
+%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean rule to remove compiled binaries AND object files
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS)
+
+.PHONY: all clean
