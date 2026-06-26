@@ -10,6 +10,7 @@ static int save_bnk_accts(void);
 static int load_bnk_accts(void);
 static int free_bnk_accts(void);
 static int num_ll(void);
+static int update_balance(void);
 
 int bnk_acct_main(void) {
 
@@ -19,6 +20,7 @@ int bnk_acct_main(void) {
         printf("\nAccounts Menu:\n");
         printf("(a) add acct\n");
         printf("(d) delete acct\n");
+        printf("(u) update balance\n");
         printf("(l) list accts\n");
         printf("(o) load bnk accts\n");
         printf("(s) save\n");
@@ -29,6 +31,9 @@ int bnk_acct_main(void) {
         }
         if (ch == 'd') {
             delete_acct();
+        }
+        if (ch == 'u') {
+            update_balance();
         }
         if (ch == 'l') {
             list_accts();
@@ -43,6 +48,55 @@ int bnk_acct_main(void) {
             break;
         }
     }
+
+    return 0;
+}
+
+static int update_balance(void) {
+
+    int total_nodes = num_ll();
+    if (total_nodes == 0) {
+        printf("\nNo accts to update\n");
+        return 0;
+    }
+
+    list_accts();
+    printf("Enter number to udpate: ");
+    char ch = 'a';
+    while (!isdigit(ch)) {
+        ch = single_char_input();
+    }
+    int ud_line = ch - '0';
+
+    if (ud_line < 1 || ud_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
+    printf("Enter new balance: ");
+    char new_bal_s[ACCT_NAME_LEN];
+    char *endptr;
+    fgets(new_bal_s, ACCT_NAME_LEN, stdin);
+    float new_bal_f = strtof(new_bal_s, &endptr);
+    if (new_bal_s == endptr) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    if (ud_line == 1) {
+        accts_ll->balance = new_bal_f;
+        printf("Ammount updated\n");
+        return 0;
+    } 
+
+    bnk_acct_t *curr = accts_ll;
+
+    for (int i = 1; i < ud_line; i++) {
+        curr = curr->next_acct;
+    }
+    curr->balance = new_bal_f;
+
+    printf("\nAcct updated\n");
 
     return 0;
 }
