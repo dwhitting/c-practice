@@ -4,15 +4,51 @@ static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
-static int delete_acct(void);
-static int add_acct(void);
+static int delete_acct(acct_type_t acct_type);
+static int add_acct(acct_type_t acct_type);
 static acct_t *new_acct(void);
-static void list_accts(acct_type_t acct_type);
-static int save_accts(void);
+static int list_accts(acct_type_t acct_type);
+static int save_accts(acct_type_t acct_type);
 static int load_accts(acct_type_t acct_type);
-static int free_accts(void);
-static int num_ll(void);
-static int update_balance(void);
+static int free_accts(acct_type_t acct_type);
+static int num_ll(acct_type_t acct_type);
+static int update_balance(acct_type_t acct_type);
+static acct_t *get_acct_head(acct_type_t acct_type);
+static int set_acct_head(acct_type_t acct_type, acct_t *input_node);
+static char *get_acct_type_name(acct_type_t acct_type);
+
+static acct_t *get_acct_head(acct_type_t acct_type) {
+    if (acct_type.acct_Type == bnkAcct) {
+        return bnk_accts_ll;
+    } else if (acct_type.acct_Type == credAcct) {
+        return cc_accts_ll;
+    } else {
+        stan_err("acct in get_acct_head not recognized");
+    }
+    return NULL;
+}
+
+static int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
+    if (acct_type.acct_Type == bnkAcct) {
+        bnk_accts_ll = input_node;
+    } else if (acct_type.acct_Type == credAcct) {
+        cc_accts_ll = input_node;
+    } else {
+        stan_err("acct type in set_acct_head not recognized");
+    }
+    return 0;
+}
+
+static char *get_acct_type_name(acct_type_t acct_type) {
+    if (acct_type.acct_Type == bnkAcct) {
+        return "Bank Account";
+    } else if (acct_type.acct_Type == credAcct) {
+        return "Credit Account";
+    } else {
+        stan_err("acct type in acc_type_name not recognized");
+    }
+    return NULL;
+}
 
 int accts_main(void) {
 
@@ -28,7 +64,8 @@ int accts_main(void) {
             accts_menu(acct_type);
         }
         if (ch == 'c') {
-            break;
+            acct_type.acct_Type = credAcct;
+            accts_menu(acct_type);
         }
         if (ch == 'q') {
             break;
@@ -41,7 +78,7 @@ int accts_main(void) {
 
 static int accts_menu(acct_type_t acct_type) {
     while (1) {
-        printf("\nUpdate Menu:\n");
+        printf("\n%s Update Menu:\n", get_acct_type_name(acct_type));
         printf("(a) add acct\n");
         printf("(d) delete acct\n");
         printf("(u) update balance\n");
@@ -51,13 +88,13 @@ static int accts_menu(acct_type_t acct_type) {
         printf("(q) quit accts\n");
         char ch = single_char_input();
         if (ch == 'a') {
-            add_acct();
+            add_acct(acct_type);
         }
         if (ch == 'd') {
-            delete_acct();
+            delete_acct(acct_type);
         }
         if (ch == 'u') {
-            update_balance();
+            update_balance(acct_type);
         }
         if (ch == 'l') {
             list_accts(acct_type);
@@ -66,7 +103,7 @@ static int accts_menu(acct_type_t acct_type) {
             load_accts(acct_type);
         }
         if (ch == 's') {
-            save_accts();
+            save_accts(acct_type);
         }
         if (ch == 'q') {
             break;
@@ -76,15 +113,15 @@ static int accts_menu(acct_type_t acct_type) {
     return 0;
 }
 
-static int update_balance(void) {
+static int update_balance(acct_type_t acct_type) {
 
-    int total_nodes = num_ll();
+    int total_nodes = num_ll(acct_type);
     if (total_nodes == 0) {
         printf("\nNo accts to update\n");
         return 0;
     }
 
-    //list_accts();
+    list_accts(acct_type);
     printf("Enter number to udpate: ");
     char ch = 'a';
     while (!isdigit(ch)) {
@@ -107,13 +144,13 @@ static int update_balance(void) {
         return 0;
     }
 
+    acct_t *curr = get_acct_head(acct_type);
+
     if (ud_line == 1) {
-        bnk_accts_ll->balance = new_bal_f;
+        curr->balance = new_bal_f;
         printf("Ammount updated\n");
         return 0;
     } 
-
-    acct_t *curr = bnk_accts_ll;
 
     for (int i = 1; i < ud_line; i++) {
         curr = curr->next_acct;
@@ -125,15 +162,15 @@ static int update_balance(void) {
     return 0;
 }
 
-static int delete_acct(void) {
+static int delete_acct(acct_type_t acct_type) {
     
-    int total_nodes = num_ll();
+    int total_nodes = num_ll(acct_type);
     if (total_nodes == 0) {
         printf("\nNo accts to remove\n");
         return 0;
     }
 
-    //list_accts();
+    list_accts(acct_type);
     printf("Enter number to remove: ");
     char ch = 'a';
     while (!isdigit(ch)) {
@@ -147,15 +184,15 @@ static int delete_acct(void) {
     }
 
     if (rem_line == 1) {
-        acct_t *head = bnk_accts_ll;
-        bnk_accts_ll = bnk_accts_ll->next_acct;
+        acct_t *head = get_acct_head(acct_type);
+        set_acct_head(acct_type, head->next_acct);
         free(head);
         printf("\nRemoved first acct\n");
         return 0;
     } 
     
     acct_t *prev = NULL;
-    acct_t *curr = bnk_accts_ll;
+    acct_t *curr = get_acct_head(acct_type);
 
     for (int i = 1; i < rem_line; i++) {
         prev = curr;
@@ -169,9 +206,9 @@ static int delete_acct(void) {
     return 0;
 }
 
-static int num_ll(void) {
+static int num_ll(acct_type_t acct_type) {
     int cnt = 0;
-    acct_t *curr = bnk_accts_ll;
+    acct_t *curr = get_acct_head(acct_type);
     while (curr != NULL) {
         cnt++;
         curr = curr->next_acct;
@@ -187,10 +224,16 @@ static acct_t *new_acct(void) {
     return new_a;
 }
 
-static void list_accts(acct_type_t acct_type) {
+static int list_accts(acct_type_t acct_type) {
     acct_t *curr;
     if (acct_type.acct_Type == bnkAcct) {
         curr = bnk_accts_ll;
+    } else if (acct_type.acct_Type == credAcct) {
+        curr = cc_accts_ll;
+    }
+    if (curr == NULL) {
+        printf("\nlinked list is empty\n");
+        return 0;
     }
     int idx = 1;
     printf("\n");
@@ -199,21 +242,23 @@ static void list_accts(acct_type_t acct_type) {
         curr = curr->next_acct;
     }
     printf("\n");
+    return 0;
 }
 
-static int add_acct(void) {
+static int add_acct(acct_type_t acct_type) {
+    acct_t *curr = get_acct_head(acct_type);
+    acct_t *head = curr;
 
-    if (bnk_accts_ll == NULL) {
-        bnk_accts_ll = new_acct();
+    if (curr == NULL) {
+        curr = new_acct();
         printf("First account...\n");
         printf("Enter acct name: ");
         char in_name[ACCT_NAME_LEN];
         fgets(in_name, ACCT_NAME_LEN, stdin);
         in_name[strcspn(in_name, "\n")] = '\0';
-        strcpy(bnk_accts_ll->name, in_name); 
+        strcpy(curr->name, in_name); 
+        set_acct_head(acct_type, curr);
     } else {
-        acct_t *curr = bnk_accts_ll;
-        acct_t *head = bnk_accts_ll;
         while (curr->next_acct != NULL) {
             curr = curr->next_acct;
         }
@@ -222,24 +267,38 @@ static int add_acct(void) {
         char in_name[ACCT_NAME_LEN];
         fgets(in_name, ACCT_NAME_LEN, stdin);
         in_name[strcspn(in_name, "\n")] = '\0';
-        strcpy(curr->next_acct->name, in_name);  
-        bnk_accts_ll = head;
+        strcpy(curr->next_acct->name, in_name);
+        if (acct_type.acct_Type == bnkAcct) {
+            bnk_accts_ll = head;
+        } else {
+            cc_accts_ll = head;
+        }
+        
     }
 
     return 0;
 }
 
-static int save_accts(void) {
-    int fd = open("bnk_data", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-      if (fd < 0) {
+static int save_accts(acct_type_t acct_type) {
+    
+    int fd;
+    if (acct_type.acct_Type == bnkAcct) {
+        fd = open("bnk_data", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    } else if (acct_type.acct_Type == credAcct) {
+        fd = open("cc_data", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    }    
+    if (fd < 0) {
         stan_err("open bnk_data failed");
     }
 
-    acct_t *curr = bnk_accts_ll;
+    acct_t *curr = get_acct_head(acct_type);
     while (curr != NULL) {
-        acct_t temp_save = *curr;
+        acct_t *temp_save = curr->next_acct;
+        curr->next_acct = NULL;
 
-        write(fd, &temp_save, sizeof(acct_t));
+        write(fd, curr, sizeof(acct_t));
+
+        curr->next_acct = temp_save;
         curr = curr->next_acct;
     }
 
@@ -253,10 +312,9 @@ static int load_accts(acct_type_t acct_type) {
     int fd;
     if (acct_type.acct_Type == bnkAcct) {
         fd = open("bnk_data", O_RDONLY);
-    } else {
-        return 0;
+    } else if (acct_type.acct_Type == credAcct) {
+        fd = open("cc_data", O_RDONLY);
     }
-
     
     if (fd < 0) {
         if (errno == ENOENT) {
@@ -269,7 +327,8 @@ static int load_accts(acct_type_t acct_type) {
         
     }
 
-    free_accts();
+    free_accts(acct_type);
+    acct_t *head = get_acct_head(acct_type);
     acct_t *curr_node = NULL;
     ssize_t bytes_read;
     size_t struct_size = sizeof(acct_t);
@@ -297,9 +356,11 @@ static int load_accts(acct_type_t acct_type) {
             break;
         }
 
-        if (bnk_accts_ll == NULL) {
-            bnk_accts_ll = node_read;
-            curr_node = bnk_accts_ll;
+        node_read->next_acct = NULL;
+
+        if (head == NULL) {
+            head = node_read;
+            curr_node = head;
         } else {
             curr_node->next_acct = node_read;
             curr_node = curr_node->next_acct;
@@ -310,27 +371,31 @@ static int load_accts(acct_type_t acct_type) {
     }
 
     close(fd);
-
+    set_acct_head(acct_type, head);
     return 0;
 
 }
 
-static int free_accts(void) {
-    acct_t *prev = NULL;
-    acct_t *curr = bnk_accts_ll;
+static int free_accts(acct_type_t acct_type) {
+    acct_t *head = get_acct_head(acct_type);
+    acct_t *curr = head;
+    acct_t *next = NULL;
 
     while (curr != NULL) {
-        prev = curr;
-        curr = curr->next_acct;
-        free(prev);
+        next = curr->next_acct;
+        free(curr);
+        curr = next;
     }
     
-    bnk_accts_ll = NULL;
-
+    set_acct_head(acct_type, NULL);
     return 0;
 }
 
 int accts_exit(void) {
-    free_accts();
+    acct_type_t bnk = {.acct_Type = bnkAcct};
+    acct_type_t cred = {.acct_Type = credAcct};
+    free_accts(bnk);
+    free_accts(cred);
+
     return 0;
 }
