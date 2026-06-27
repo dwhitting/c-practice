@@ -9,7 +9,7 @@ static int add_acct(void);
 static acct_t *new_acct(void);
 static void list_accts(acct_type_t acct_type);
 static int save_accts(void);
-static int load_accts(void);
+static int load_accts(acct_type_t acct_type);
 static int free_accts(void);
 static int num_ll(void);
 static int update_balance(void);
@@ -63,7 +63,7 @@ static int accts_menu(acct_type_t acct_type) {
             list_accts(acct_type);
         }
         if (ch == 'o') {
-            load_accts();
+            load_accts(acct_type);
         }
         if (ch == 's') {
             save_accts();
@@ -250,8 +250,9 @@ static int save_accts(void) {
 
 static int load_accts(acct_type_t acct_type) {
 
-    if (acct_type.acct_Type = bnkAcct) {
-        int fd = open("bnk_data", O_RDONLY);
+    int fd;
+    if (acct_type.acct_Type == bnkAcct) {
+        fd = open("bnk_data", O_RDONLY);
     } else {
         return 0;
     }
