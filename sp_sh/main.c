@@ -12,11 +12,11 @@ int main() {
         if (ch == 'q') {
             break;
         } else if (ch == 'b') {
-            bnk_acct_main();
+            accts_main();
         }
     }
     
-   bnk_accts_exit();
+   accts_exit();
 
     return 0;
 }

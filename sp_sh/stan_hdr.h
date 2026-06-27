@@ -13,16 +13,26 @@
 
 #define ACCT_NAME_LEN 100
 
-typedef struct _bnk_acct_t {
+enum AcctType {
+    bnkAcct,
+    credAcct
+};
+
+typedef struct {
+    enum AcctType acct_Type;
+} acct_type_t;
+
+typedef struct _acct_t {
     char name[ACCT_NAME_LEN];
     float balance;
-    struct _bnk_acct_t *next_acct;
-} bnk_acct_t;
+    float cred_lim;
+    struct _acct_t *next_acct;
+} acct_t;
 
 int stan_err(char * in_str);
 char single_char_input(void);
 
-int bnk_acct_main(void);
-int bnk_accts_exit(void);
+int accts_main(void);
+int accts_exit(void);
 
 #endif
