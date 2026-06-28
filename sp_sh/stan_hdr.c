@@ -60,6 +60,7 @@ void read_raw_line(char *buffer, size_t max_len) {
 
 char *month_to_str(Month in_month) {
     switch (in_month) {
+        case None: return "Not Set";
         case JAN: return "JAN";
         case FEB: return "FEB";
         case MAR: return "MAR";

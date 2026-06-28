@@ -19,7 +19,7 @@ typedef enum {
 } AcctType;
 
 typedef enum {
-    Zero_hold, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
+    None, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
 } Month;
 
 typedef struct {
