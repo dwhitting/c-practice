@@ -57,3 +57,21 @@ void read_raw_line(char *buffer, size_t max_len) {
         buffer[0] = '\0';
     }
 }
+
+char *month_to_str(Month in_month) {
+    switch (in_month) {
+        case JAN: return "JAN";
+        case FEB: return "FEB";
+        case MAR: return "MAR";
+        case APR: return "APR";
+        case MAY: return "MAY";
+        case JUN: return "JUN";
+        case JUL: return "JUL";
+        case AUG: return "AUG";
+        case SEP: return "SEP";
+        case OCT: return "OCT";
+        case NOV: return "NOV";
+        case DEC: return "DEC";
+        default: return "Unknown month entry";
+    }
+}

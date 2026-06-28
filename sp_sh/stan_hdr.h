@@ -13,17 +13,23 @@
 
 #define ACCT_NAME_LEN 100
 
-enum AcctType {
+typedef enum {
     bnkAcct,
     credAcct
-};
+} AcctType;
+
+typedef enum {
+    Zero_hold, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
+} Month;
 
 typedef struct {
-    enum AcctType acct_Type;
+    AcctType acct_Type;
 } acct_type_t;
 
 typedef struct _acct_t {
     char name[ACCT_NAME_LEN];
+    int day;
+    Month month;
     float balance;
     float cred_lim;
     struct _acct_t *next_acct;
@@ -35,5 +41,6 @@ char single_char_input(void);
 int accts_main(void);
 int accts_exit(void);
 void read_raw_line(char *buffer, size_t max_len);
+char *month_to_str(Month in_month);
 
 #endif

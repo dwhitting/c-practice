@@ -16,6 +16,7 @@ static int update_balance(acct_type_t acct_type, char menu_sel);
 static acct_t *get_acct_head(acct_type_t acct_type);
 static int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 static char *get_acct_type_name(acct_type_t acct_type);
+static int update_cred_date(acct_type_t acct_type);
 
 static acct_t *get_acct_head(acct_type_t acct_type) {
     if (acct_type.acct_Type == bnkAcct) {
@@ -85,6 +86,9 @@ static int accts_menu(acct_type_t acct_type) {
         if (acct_type.acct_Type == credAcct) {
             printf("(i) update limit\n");
         }
+        if (acct_type.acct_Type == credAcct) {
+            printf("(m) update day/month\n");
+        }
         printf("(l) list accts\n");
         printf("(o) load bnk accts\n");
         printf("(s) save\n");
@@ -108,6 +112,9 @@ static int accts_menu(acct_type_t acct_type) {
             fflush(stdout);
             single_char_input();
         }
+        if (ch == 'm' && acct_type.acct_Type == credAcct) {
+            update_cred_date(acct_type);
+        }
         if (ch == 'o') {
             load_accts(acct_type);
         }
@@ -118,6 +125,64 @@ static int accts_menu(acct_type_t acct_type) {
             break;
         }
     }
+
+    return 0;
+}
+
+static int update_cred_date(acct_type_t acct_type) {
+
+    list_accts(acct_type);
+
+    char day_or_month;
+    printf("(d) Day or (m) Month: ");
+    fflush(stdout);
+    while (1) {
+        day_or_month = single_char_input();
+        if (day_or_month == 'd' || day_or_month == 'm') {
+            break;
+        }
+    }
+    printf("char: %c\n", day_or_month);
+
+    printf("Enter number to udpate: ");
+    fflush(stdout);
+    char ch = 'a';
+    while (!isdigit(ch)) {
+        ch = single_char_input();
+    }
+    int ud_line = ch - '0'; 
+
+    int total_nodes = num_ll(acct_type);
+    if (ud_line < 1 || ud_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
+    printf("Enter new value: ");
+    char new_val_s[ACCT_NAME_LEN];
+    char *endptr;
+    read_raw_line(new_val_s, ACCT_NAME_LEN);
+    int new_bal_i = strtof(new_val_s, &endptr);
+    if (new_val_s == endptr) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    acct_t *curr = get_acct_head(acct_type);
+
+    if (ud_line > 1) {
+        for (int i = 1; i < ud_line; i++) {
+            curr = curr->next_acct;
+        }
+    } 
+
+    if (day_or_month == 'd') {
+        curr->day = new_bal_i;
+    } else if (day_or_month == 'm') {
+        curr->month = new_bal_i;
+    }
+
+    printf("\nAcct updated\n");
 
     return 0;
 }
@@ -253,7 +318,8 @@ static int list_accts(acct_type_t acct_type) {
         if (acct_type.acct_Type == bnkAcct) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         } else if (acct_type.acct_Type == credAcct) {
-            printf("<%d> %-14s bal: $%.2f  <lim: $%.2f>\n",idx++,  curr->name, curr->balance, curr->cred_lim);
+            char *mon = month_to_str(curr->month);
+            printf("<%d> %s %-14s bal: $%.2f  <lim: $%.2f>\n",idx++, mon, curr->name, curr->balance, curr->cred_lim);
         }
         
         curr = curr->next_acct;
@@ -314,6 +380,8 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, curr->name, ACCT_NAME_LEN);
         write(fd, &curr->balance, sizeof(float));
         write(fd, &curr->cred_lim, sizeof(float));
+        write(fd, &curr->day, sizeof(int));
+        write(fd, &curr->month, sizeof(int));
     
         curr->next_acct = temp_save;
         curr = curr->next_acct;
@@ -368,6 +436,8 @@ static int load_accts(acct_type_t acct_type) {
 
         read(fd, &node_read->balance, sizeof(float));
         read(fd, &node_read->cred_lim, sizeof(float));
+        read(fd, &node_read->day, sizeof(int));
+        read(fd, &node_read->month, sizeof(int));
 
         node_read->next_acct = NULL;
 
