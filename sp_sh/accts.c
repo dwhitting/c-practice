@@ -11,7 +11,6 @@ static int list_accts(acct_type_t acct_type);
 static int save_accts(acct_type_t acct_type);
 static int load_accts(acct_type_t acct_type);
 static int free_accts(acct_type_t acct_type);
-static int num_ll(acct_type_t acct_type);
 static int update_balance(acct_type_t acct_type, char menu_sel);
 static acct_t *get_acct_head(acct_type_t acct_type);
 static int set_acct_head(acct_type_t acct_type, acct_t *input_node);
@@ -81,17 +80,20 @@ static int accts_menu(acct_type_t acct_type) {
     int width = 25;
     while (1) {
         printf("\n%s Update Menu:\n", get_acct_type_name(acct_type));
-        printf("%-*s", width, "(a) add acct, ");
+        printf("%-*s", width, "(a) add acct ");
         printf("(d) delete acct\n");
-        printf("%-*s", width, "(u) update balance, ");
+        printf("%-*s", width, "(u) update balance ");
         printf("(l) list accts\n");
-        printf("%-*s", width, "(o) load bnk accts, ");
+        printf("%-*s", width, "(o) load bnk accts ");
         printf("(s) save\n");
             if (acct_type.acct_Type == credAcct) {
-            printf("(i) update limit\n");
+            printf("%-*s", width, "(i) update limit");
         }
         if (acct_type.acct_Type == credAcct) {
             printf("(m) update day/month\n");
+        }
+        if (acct_type.acct_Type == credAcct) {
+            printf("(r) update bal remain\n");
         }
         printf("(q) quit accts\n");
         char ch = single_char_input();
@@ -104,7 +106,7 @@ static int accts_menu(acct_type_t acct_type) {
         if (ch == 'u') {
             update_balance(acct_type, ch);
         }
-        if (ch == 'i' && acct_type.acct_Type == credAcct) {
+        if ((ch == 'i' || ch == 'r') && acct_type.acct_Type == credAcct) {
             update_balance(acct_type, ch);
         }
         if (ch == 'l') {
@@ -236,6 +238,8 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         curr->balance = new_bal_f;
     } else if (menu_sel == 'i') {
         curr->cred_lim = new_bal_f;
+    } else if (menu_sel == 'r') {
+        curr->cred_remain = new_bal_f;
     }
 
     printf("\nAcct updated\n");
@@ -287,7 +291,7 @@ static int delete_acct(acct_type_t acct_type) {
     return 0;
 }
 
-static int num_ll(acct_type_t acct_type) {
+int num_ll(acct_type_t acct_type) {
     int cnt = 0;
     acct_t *curr = get_acct_head(acct_type);
     while (curr != NULL) {
@@ -301,12 +305,20 @@ static acct_t *new_acct(void) {
     acct_t *new_a = (acct_t *)malloc(sizeof(acct_t));
     strcpy(new_a->name, "<no name>");
     new_a->balance = 0.0;
+    new_a->cred_lim = 0.0;
+    new_a->day = 1;
+    new_a->month = 0;
+    new_a->cred_remain = 0.0;
+    new_a->date_sort = 0;
     new_a->next_acct = NULL;
     return new_a;
 }
 
 static int list_accts(acct_type_t acct_type) {
     acct_t *curr;
+    if (acct_type.acct_Type == credAcct) {
+        sort_by_date(get_acct_head(acct_type));
+    }
     if (acct_type.acct_Type == bnkAcct) {
         curr = bnk_accts_ll;
     } else if (acct_type.acct_Type == credAcct) {

@@ -33,6 +33,7 @@ typedef struct _acct_t {
     float balance;
     float cred_lim;
     float cred_remain;
+    int date_sort;
     struct _acct_t *next_acct;
 } acct_t;
 
@@ -43,5 +44,7 @@ int accts_main(void);
 int accts_exit(void);
 void read_raw_line(char *buffer, size_t max_len);
 char *month_to_str(Month in_month);
+int sort_by_date(acct_t *input_head);
+int num_ll(acct_type_t acct_type);
 
 #endif

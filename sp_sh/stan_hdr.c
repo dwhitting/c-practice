@@ -76,3 +76,27 @@ char *month_to_str(Month in_month) {
         default: return "Unknown month entry";
     }
 }
+
+int sort_by_date(acct_t *input_head) {
+    acct_type_t acct_type;
+    acct_type.acct_Type = credAcct;
+    if (num_ll(acct_type) == 1) {
+        return 0;
+    }
+    
+    acct_t *curr = input_head;
+    while (curr != NULL) {
+        curr->date_sort = (100 * curr->month) + curr->day;
+        curr = curr->next_acct;
+    }
+
+    /* set node that will be tested */
+    acct_t *test;
+    for (int i = 0; i < 2; i++) {
+
+    }
+
+
+
+    return 0;
+}
