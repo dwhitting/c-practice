@@ -32,6 +32,7 @@ typedef struct _acct_t {
     Month month;
     float balance;
     float cred_lim;
+    float cred_remain;
     struct _acct_t *next_acct;
 } acct_t;
 

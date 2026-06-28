@@ -78,20 +78,21 @@ int accts_main(void) {
 }
 
 static int accts_menu(acct_type_t acct_type) {
+    int width = 25;
     while (1) {
         printf("\n%s Update Menu:\n", get_acct_type_name(acct_type));
-        printf("(a) add acct\n");
+        printf("%-*s", width, "(a) add acct, ");
         printf("(d) delete acct\n");
-        printf("(u) update balance\n");
-        if (acct_type.acct_Type == credAcct) {
+        printf("%-*s", width, "(u) update balance, ");
+        printf("(l) list accts\n");
+        printf("%-*s", width, "(o) load bnk accts, ");
+        printf("(s) save\n");
+            if (acct_type.acct_Type == credAcct) {
             printf("(i) update limit\n");
         }
         if (acct_type.acct_Type == credAcct) {
             printf("(m) update day/month\n");
         }
-        printf("(l) list accts\n");
-        printf("(o) load bnk accts\n");
-        printf("(s) save\n");
         printf("(q) quit accts\n");
         char ch = single_char_input();
         if (ch == 'a') {
@@ -319,7 +320,8 @@ static int list_accts(acct_type_t acct_type) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         } else if (acct_type.acct_Type == credAcct) {
             char *mon = month_to_str(curr->month);
-            printf("<%d> %2d %s %-14s bal: $%.2f  <lim: $%.2f>\n",idx++, curr->day, mon, curr->name, curr->balance, curr->cred_lim);
+            printf("<%d> %2d %s %-14s bal: $%.2f (remain: $%.2f)  <lim: $%.2f>\n",idx++, curr->day, mon, curr->name, 
+                curr->balance, curr->cred_remain, curr->cred_lim);
         }
         
         curr = curr->next_acct;
@@ -382,6 +384,7 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->cred_lim, sizeof(float));
         write(fd, &curr->day, sizeof(int));
         write(fd, &curr->month, sizeof(int));
+        write(fd, &curr->cred_remain, sizeof(float));
     
         curr->next_acct = temp_save;
         curr = curr->next_acct;
@@ -438,6 +441,7 @@ static int load_accts(acct_type_t acct_type) {
         read(fd, &node_read->cred_lim, sizeof(float));
         read(fd, &node_read->day, sizeof(int));
         read(fd, &node_read->month, sizeof(int));
+        read(fd, &node_read->cred_remain, sizeof(float));
 
         node_read->next_acct = NULL;
 
