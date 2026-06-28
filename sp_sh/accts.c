@@ -198,6 +198,7 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
 
     list_accts(acct_type);
     printf("Enter number to udpate: ");
+    fflush(stdout);
     char ch = 'a';
     while (!isdigit(ch)) {
         ch = single_char_input();
@@ -206,10 +207,12 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
 
     if (ud_line < 1 || ud_line > total_nodes) {
         printf("\nSelection out of range\n");
+        fflush(stdout);
         return 0;
     }
 
-    printf("Enter new balance: ");
+    printf("\nEnter new balance: ");
+    fflush(stdout);
     char new_bal_s[ACCT_NAME_LEN];
     char *endptr;
     read_raw_line(new_bal_s, ACCT_NAME_LEN);
