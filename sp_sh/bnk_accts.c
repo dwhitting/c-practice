@@ -12,7 +12,7 @@ static int save_accts(acct_type_t acct_type);
 static int load_accts(acct_type_t acct_type);
 static int free_accts(acct_type_t acct_type);
 static int num_ll(acct_type_t acct_type);
-static int update_balance(acct_type_t acct_type);
+static int update_balance(acct_type_t acct_type, char menu_sel);
 static acct_t *get_acct_head(acct_type_t acct_type);
 static int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 static char *get_acct_type_name(acct_type_t acct_type);
@@ -82,6 +82,9 @@ static int accts_menu(acct_type_t acct_type) {
         printf("(a) add acct\n");
         printf("(d) delete acct\n");
         printf("(u) update balance\n");
+        if (acct_type.acct_Type == credAcct) {
+            printf("(i) update limit\n");
+        }
         printf("(l) list accts\n");
         printf("(o) load bnk accts\n");
         printf("(s) save\n");
@@ -94,10 +97,16 @@ static int accts_menu(acct_type_t acct_type) {
             delete_acct(acct_type);
         }
         if (ch == 'u') {
-            update_balance(acct_type);
+            update_balance(acct_type, ch);
+        }
+        if (ch == 'i' && acct_type.acct_Type == credAcct) {
+            update_balance(acct_type, ch);
         }
         if (ch == 'l') {
             list_accts(acct_type);
+            printf("\nPress key to continue...");
+            fflush(stdout);
+            single_char_input();
         }
         if (ch == 'o') {
             load_accts(acct_type);
@@ -113,7 +122,7 @@ static int accts_menu(acct_type_t acct_type) {
     return 0;
 }
 
-static int update_balance(acct_type_t acct_type) {
+static int update_balance(acct_type_t acct_type, char menu_sel) {
 
     int total_nodes = num_ll(acct_type);
     if (total_nodes == 0) {
@@ -137,7 +146,7 @@ static int update_balance(acct_type_t acct_type) {
     printf("Enter new balance: ");
     char new_bal_s[ACCT_NAME_LEN];
     char *endptr;
-    fgets(new_bal_s, ACCT_NAME_LEN, stdin);
+    read_raw_line(new_bal_s, ACCT_NAME_LEN);
     float new_bal_f = strtof(new_bal_s, &endptr);
     if (new_bal_s == endptr) {
         printf("No value entered\n");
@@ -146,16 +155,19 @@ static int update_balance(acct_type_t acct_type) {
 
     acct_t *curr = get_acct_head(acct_type);
 
-    if (ud_line == 1) {
-        curr->balance = new_bal_f;
-        printf("Ammount updated\n");
-        return 0;
+    if (ud_line > 1) {
+
+        for (int i = 1; i < ud_line; i++) {
+            curr = curr->next_acct;
+        }
+        
     } 
 
-    for (int i = 1; i < ud_line; i++) {
-        curr = curr->next_acct;
+    if (menu_sel == 'u') {
+        curr->balance = new_bal_f;
+    } else if (menu_sel == 'i') {
+        curr->cred_lim = new_bal_f;
     }
-    curr->balance = new_bal_f;
 
     printf("\nAcct updated\n");
 
@@ -238,10 +250,15 @@ static int list_accts(acct_type_t acct_type) {
     int idx = 1;
     printf("\n");
     while (curr != NULL) {
-        printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
+        if (acct_type.acct_Type == bnkAcct) {
+            printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
+        } else if (acct_type.acct_Type == credAcct) {
+            printf("<%d> %-14s bal: $%.2f  <lim: $%.2f>\n",idx++,  curr->name, curr->balance, curr->cred_lim);
+        }
+        
         curr = curr->next_acct;
     }
-    printf("\n");
+
     return 0;
 }
 
@@ -249,13 +266,14 @@ static int add_acct(acct_type_t acct_type) {
     acct_t *curr = get_acct_head(acct_type);
     acct_t *head = curr;
 
+    printf("Enter acct name: ");
+    char in_name[ACCT_NAME_LEN];
+    read_raw_line(in_name, ACCT_NAME_LEN);
+    in_name[strcspn(in_name, "\n")] = '\0';
+
     if (curr == NULL) {
         curr = new_acct();
         printf("First account...\n");
-        printf("Enter acct name: ");
-        char in_name[ACCT_NAME_LEN];
-        fgets(in_name, ACCT_NAME_LEN, stdin);
-        in_name[strcspn(in_name, "\n")] = '\0';
         strcpy(curr->name, in_name); 
         set_acct_head(acct_type, curr);
     } else {
@@ -263,10 +281,7 @@ static int add_acct(acct_type_t acct_type) {
             curr = curr->next_acct;
         }
         curr->next_acct = new_acct();
-        printf("Enter acct name: ");
-        char in_name[ACCT_NAME_LEN];
-        fgets(in_name, ACCT_NAME_LEN, stdin);
-        in_name[strcspn(in_name, "\n")] = '\0';
+
         strcpy(curr->next_acct->name, in_name);
         if (acct_type.acct_Type == bnkAcct) {
             bnk_accts_ll = head;
@@ -296,8 +311,10 @@ static int save_accts(acct_type_t acct_type) {
         acct_t *temp_save = curr->next_acct;
         curr->next_acct = NULL;
 
-        write(fd, curr, sizeof(acct_t));
-
+        write(fd, curr->name, ACCT_NAME_LEN);
+        write(fd, &curr->balance, sizeof(float));
+        write(fd, &curr->cred_lim, sizeof(float));
+    
         curr->next_acct = temp_save;
         curr = curr->next_acct;
     }
@@ -331,30 +348,26 @@ static int load_accts(acct_type_t acct_type) {
     acct_t *head = get_acct_head(acct_type);
     acct_t *curr_node = NULL;
     ssize_t bytes_read;
-    size_t struct_size = sizeof(acct_t);
 
     while (1) {
         acct_t *node_read = new_acct();
-        bytes_read = read(fd, node_read, struct_size);
         if (node_read == NULL) {
             stan_err("error allocating node_read\n");
         }
-
+        bytes_read = read(fd, node_read->name, ACCT_NAME_LEN);
         if (bytes_read == 0) {
             free(node_read);
             break;
         }
 
-        if (bytes_read < 0) {
-            free(node_read);
-            stan_err("Error while reading bnk_accts file");
-        }
-
-        if (bytes_read < (ssize_t)struct_size) {
-            printf("Partial struct read error in load_accts\n");
+        if (bytes_read < ACCT_NAME_LEN) {
+            printf("Data error while reading acct name\n");
             free(node_read);
             break;
         }
+
+        read(fd, &node_read->balance, sizeof(float));
+        read(fd, &node_read->cred_lim, sizeof(float));
 
         node_read->next_acct = NULL;
 
@@ -365,8 +378,6 @@ static int load_accts(acct_type_t acct_type) {
             curr_node->next_acct = node_read;
             curr_node = curr_node->next_acct;
         }
-
-        curr_node->next_acct = NULL;
 
     }
 

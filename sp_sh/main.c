@@ -5,8 +5,8 @@ int main() {
     while (1) {
         
         printf("\nMenu:\n");
-        printf("(b) bnk accts\n");
-        printf("(q) quit\n");
+        printf("(b) Bnk accts\n");
+        printf("(q) Quit\n");
         char ch = single_char_input();
 
         if (ch == 'q') {
@@ -16,7 +16,7 @@ int main() {
         }
     }
     
-   accts_exit();
+    accts_exit();
 
     return 0;
 }

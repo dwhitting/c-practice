@@ -43,3 +43,17 @@ char single_char_input(void)
 
     return ch;
 }
+
+void read_raw_line(char *buffer, size_t max_len) {
+
+    fflush(stdout);
+    
+    ssize_t bytes_read = read(STDIN_FILENO, buffer, max_len -1);
+
+    if (bytes_read > 0) {
+        buffer[bytes_read] = '\0';
+        buffer[strcspn(buffer, "\n\r")] = '\0';
+    } else {
+        buffer[0] = '\0';
+    }
+}

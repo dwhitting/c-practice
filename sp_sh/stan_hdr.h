@@ -34,5 +34,6 @@ char single_char_input(void);
 
 int accts_main(void);
 int accts_exit(void);
+void read_raw_line(char *buffer, size_t max_len);
 
 #endif
