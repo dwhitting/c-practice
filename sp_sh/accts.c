@@ -158,7 +158,7 @@ static int update_cred_date(acct_type_t acct_type) {
         return 0;
     }
 
-    printf("Enter new value: ");
+    printf("\nEnter new value: ");
     char new_val_s[ACCT_NAME_LEN];
     char *endptr;
     read_raw_line(new_val_s, ACCT_NAME_LEN);
@@ -319,7 +319,7 @@ static int list_accts(acct_type_t acct_type) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         } else if (acct_type.acct_Type == credAcct) {
             char *mon = month_to_str(curr->month);
-            printf("<%d> %s %-14s bal: $%.2f  <lim: $%.2f>\n",idx++, mon, curr->name, curr->balance, curr->cred_lim);
+            printf("<%d> %2d %s %-14s bal: $%.2f  <lim: $%.2f>\n",idx++, curr->day, mon, curr->name, curr->balance, curr->cred_lim);
         }
         
         curr = curr->next_acct;
