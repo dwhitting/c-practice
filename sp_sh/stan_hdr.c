@@ -119,13 +119,16 @@ int move_acct_up_one(acct_type_t acct_type) {
 
     list_accts(acct_type);
 
-    printf("Enter number to udpate: ");
-    fflush(stdout);
-    char ch = 'a';
-    while (!isdigit(ch)) {
-        ch = single_char_input();
+    printf("Enter number to update: ");
+    char new_val_s[ACCT_NAME_LEN];
+    char *endptr;
+    read_raw_line(new_val_s, ACCT_NAME_LEN);
+    int new_bal_i = strtof(new_val_s, &endptr);
+    if (new_val_s == endptr) {
+        printf("No value entered\n");
+        return 0;
     }
-    int ud_line = ch - '0'; 
+    int ud_line = new_bal_i;
 
     int total_nodes = num_ll(acct_type);
     if (ud_line < 2 || ud_line > total_nodes) {
@@ -133,17 +136,35 @@ int move_acct_up_one(acct_type_t acct_type) {
         return 0;
     }
 
-    acct_t *curr = get_acct_head(acct_type);
+    acct_t *head = get_acct_head(acct_type);
+
     if (ud_line == 2) {
-        acct_t *first = curr;
-        acct_t *sec = curr->next_acct;
-        acct_t *holder = sec->next_acct;
-        sec->next_acct = first;
-        first->next_acct = holder;
-        set_acct_head(acct_type, sec);
+        acct_t *first = head;
+        acct_t *second = head->next_acct;
+
+        first->next_acct = second->next_acct;
+        second->next_acct = first;
+
+        set_acct_head(acct_type, second);
+    } else {
+
+        acct_t *before = head;
+        for (int i = 1; i < ud_line - 2; i++) {
+            before = before->next_acct; // Node at ud_liine -2
+        }
+
+        acct_t *prev = before->next_acct;   // Node at ud_line -1
+        acct_t *target = prev->next_acct;   // Node at ud_line
+        acct_t *after = target->next_acct;  // Node after ud_line
+        
+        /* Swap */
+        before->next_acct = target;
+        target->next_acct = prev;
+        prev->next_acct = after;
+        
+        /* head hasn't changed so not calling set_acct_head */
     }
 
- 
 
     return 0;
 }
