@@ -80,7 +80,8 @@ char *month_to_str(Month in_month) {
 int sort_by_date(acct_t *input_head) {
     acct_type_t acct_type;
     acct_type.acct_Type = credAcct;
-    if (num_ll(acct_type) == 1) {
+    int num_links = num_ll(acct_type);
+    if (num_links == 1 || num_links == 0) {
         return 0;
     }
     
@@ -92,10 +93,43 @@ int sort_by_date(acct_t *input_head) {
 
     /* set node that will be tested */
     acct_t *test;
-    for (int i = 0; i < 2; i++) {
+    acct_t *test_minus_one;
+    
+
+    for (int j = num_links; j > 1; j--) {
+
+        curr = input_head;
+        test = NULL;
+        test_minus_one = NULL;
+
+        for (int i = 1; i < j; i++) {
+            if (i == j - 1) {
+                test = curr;
+            } 
+            if (i == j - 2) {
+                test_minus_one = curr;
+            }
+            curr = curr->next_acct;
+        }
+
+        if (curr->date_sort < test->date_sort) {
+
+            if (test_minus_one != NULL) {
+                test_minus_one->next_acct = curr;
+            } else {
+                input_head = curr;
+            }
+       
+            test->next_acct = curr->next_acct;    
+            curr->next_acct = test;
+        }
 
     }
 
+    set_acct_head(acct_type, input_head);
+    
+
+    //printf("curr: %s, test: %s\n", curr->name, test->name);
 
 
     return 0;

@@ -13,7 +13,6 @@ static int load_accts(acct_type_t acct_type);
 static int free_accts(acct_type_t acct_type);
 static int update_balance(acct_type_t acct_type, char menu_sel);
 static acct_t *get_acct_head(acct_type_t acct_type);
-static int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 static char *get_acct_type_name(acct_type_t acct_type);
 static int update_cred_date(acct_type_t acct_type);
 
@@ -28,7 +27,7 @@ static acct_t *get_acct_head(acct_type_t acct_type) {
     return NULL;
 }
 
-static int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
+int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
     if (acct_type.acct_Type == bnkAcct) {
         bnk_accts_ll = input_node;
     } else if (acct_type.acct_Type == credAcct) {

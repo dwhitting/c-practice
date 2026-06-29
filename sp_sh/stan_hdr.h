@@ -46,5 +46,6 @@ void read_raw_line(char *buffer, size_t max_len);
 char *month_to_str(Month in_month);
 int sort_by_date(acct_t *input_head);
 int num_ll(acct_type_t acct_type);
+int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 
 #endif
