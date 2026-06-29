@@ -80,9 +80,10 @@ char *month_to_str(Month in_month) {
 int sort_by_date(acct_t *input_head) {
     acct_type_t acct_type;
     acct_type.acct_Type = credAcct;
-    int num_links = num_ll(acct_type);
-    if (num_links == 1 || num_links == 0) {
-        return 0;
+
+    /* zero or 1 elements already sorted */
+    if (input_head == NULL || input_head->next_acct == NULL) {
+        return 0; 
     }
     
     acct_t *curr = input_head;
@@ -91,46 +92,58 @@ int sort_by_date(acct_t *input_head) {
         curr = curr->next_acct;
     }
 
-    /* set node that will be tested */
-    acct_t *test;
-    acct_t *test_minus_one;
+    /* use dummy node */
+    acct_t dummy;
+    dummy.next_acct = NULL;  /* acts as head of sorted list */
     
-
-    for (int j = num_links; j > 1; j--) {
-
-        curr = input_head;
-        test = NULL;
-        test_minus_one = NULL;
-
-        for (int i = 1; i < j; i++) {
-            if (i == j - 1) {
-                test = curr;
-            } 
-            if (i == j - 2) {
-                test_minus_one = curr;
-            }
-            curr = curr->next_acct;
+    curr = input_head;
+    while (curr != NULL) {
+        acct_t *next_node = curr->next_acct; // next node to process
+        acct_t *prev = &dummy;
+        while (prev->next_acct != NULL && prev->next_acct->date_sort < curr->date_sort) {
+            prev = prev->next_acct;
         }
 
-        if (curr->date_sort < test->date_sort) {
+        curr->next_acct = prev->next_acct;
+        prev->next_acct = curr;
 
-            if (test_minus_one != NULL) {
-                test_minus_one->next_acct = curr;
-            } else {
-                input_head = curr;
-            }
-       
-            test->next_acct = curr->next_acct;    
-            curr->next_acct = test;
-        }
-
+        curr = next_node;
     }
 
-    set_acct_head(acct_type, input_head);
-    
+    set_acct_head(acct_type, dummy.next_acct);
 
-    //printf("curr: %s, test: %s\n", curr->name, test->name);
+    return 0;
+}
 
+int move_acct_up_one(acct_type_t acct_type) {
+
+    list_accts(acct_type);
+
+    printf("Enter number to udpate: ");
+    fflush(stdout);
+    char ch = 'a';
+    while (!isdigit(ch)) {
+        ch = single_char_input();
+    }
+    int ud_line = ch - '0'; 
+
+    int total_nodes = num_ll(acct_type);
+    if (ud_line < 2 || ud_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
+    acct_t *curr = get_acct_head(acct_type);
+    if (ud_line == 2) {
+        acct_t *first = curr;
+        acct_t *sec = curr->next_acct;
+        acct_t *holder = sec->next_acct;
+        sec->next_acct = first;
+        first->next_acct = holder;
+        set_acct_head(acct_type, sec);
+    }
+
+ 
 
     return 0;
 }

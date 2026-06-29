@@ -7,16 +7,14 @@ static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
 static int add_acct(acct_type_t acct_type);
 static acct_t *new_acct(void);
-static int list_accts(acct_type_t acct_type);
 static int save_accts(acct_type_t acct_type);
 static int load_accts(acct_type_t acct_type);
 static int free_accts(acct_type_t acct_type);
 static int update_balance(acct_type_t acct_type, char menu_sel);
-static acct_t *get_acct_head(acct_type_t acct_type);
 static char *get_acct_type_name(acct_type_t acct_type);
 static int update_cred_date(acct_type_t acct_type);
 
-static acct_t *get_acct_head(acct_type_t acct_type) {
+acct_t *get_acct_head(acct_type_t acct_type) {
     if (acct_type.acct_Type == bnkAcct) {
         return bnk_accts_ll;
     } else if (acct_type.acct_Type == credAcct) {
@@ -94,10 +92,14 @@ static int accts_menu(acct_type_t acct_type) {
         if (acct_type.acct_Type == credAcct) {
             printf("(r) update bal remain\n");
         }
+        printf("(c) move row up one\n");
         printf("(q) quit accts\n");
         char ch = single_char_input();
         if (ch == 'a') {
             add_acct(acct_type);
+            if (acct_type.acct_Type == credAcct) {
+                sort_by_date(get_acct_head(acct_type));
+            }
         }
         if (ch == 'd') {
             delete_acct(acct_type);
@@ -116,12 +118,18 @@ static int accts_menu(acct_type_t acct_type) {
         }
         if (ch == 'm' && acct_type.acct_Type == credAcct) {
             update_cred_date(acct_type);
+            if (acct_type.acct_Type == credAcct) {
+                sort_by_date(get_acct_head(acct_type));
+            }
         }
         if (ch == 'o') {
             load_accts(acct_type);
         }
         if (ch == 's') {
             save_accts(acct_type);
+        }
+        if (ch == 'c') {
+            move_acct_up_one(acct_type);
         }
         if (ch == 'q') {
             break;
@@ -313,11 +321,10 @@ static acct_t *new_acct(void) {
     return new_a;
 }
 
-static int list_accts(acct_type_t acct_type) {
+int list_accts(acct_type_t acct_type) {
+
     acct_t *curr;
-    if (acct_type.acct_Type == credAcct) {
-        sort_by_date(get_acct_head(acct_type));
-    }
+        
     if (acct_type.acct_Type == bnkAcct) {
         curr = bnk_accts_ll;
     } else if (acct_type.acct_Type == credAcct) {

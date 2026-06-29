@@ -47,5 +47,8 @@ char *month_to_str(Month in_month);
 int sort_by_date(acct_t *input_head);
 int num_ll(acct_type_t acct_type);
 int set_acct_head(acct_type_t acct_type, acct_t *input_node);
+int move_acct_up_one(acct_type_t acct_type);
+int list_accts(acct_type_t acct_type);
+acct_t *get_acct_head(acct_type_t acct_type);
 
 #endif
