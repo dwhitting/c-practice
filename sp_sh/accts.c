@@ -52,7 +52,7 @@ static char *get_acct_type_name(acct_type_t acct_type) {
 int accts_main(void) {
 
     while (1) {
-        printf("\n\nAccounts Main Menu:\n");
+        printf("\nAccounts Main Menu:\n");
         printf("(b) bnk accts\n");
         printf("(c) cred accts\n");
         printf("(q) quit accts\n");
@@ -82,7 +82,7 @@ static int print_accts_menu(acct_type_t acct_type) {
 
     int width = 25;
 
-    printf("\n\n%s Update Menu:\n", get_acct_type_name(acct_type));
+    printf("\n%s Update Menu:\n", get_acct_type_name(acct_type));
     printf("%-*s", width, "(a) add acct ");
     printf("(d) delete acct\n");
     printf("%-*s", width, "(u) update balance ");
@@ -390,11 +390,16 @@ static int add_acct(acct_type_t acct_type) {
 static int save_accts(acct_type_t acct_type) {
     
     int fd;
+    char full_path[ACCT_NAME_LEN];
     if (acct_type.acct_Type == bnkAcct) {
-        fd = open("bnk_data", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        char *file = "bnk_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
     } else if (acct_type.acct_Type == credAcct) {
-        fd = open("cc_data", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    }    
+        char *file = "cc_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file); 
+    }  
+    fd = open(full_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
     if (fd < 0) {
         stan_err("open bnk_data failed");
     }
@@ -423,12 +428,17 @@ static int save_accts(acct_type_t acct_type) {
 static int load_accts(acct_type_t acct_type) {
 
     int fd;
+    char full_path[ACCT_NAME_LEN];
     if (acct_type.acct_Type == bnkAcct) {
-        fd = open("bnk_data", O_RDONLY);
+        char *file = "bnk_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
     } else if (acct_type.acct_Type == credAcct) {
-        fd = open("cc_data", O_RDONLY);
+        char *file = "cc_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);        
     }
-    
+
+    fd = open(full_path, O_RDONLY);
+
     if (fd < 0) {
         if (errno == ENOENT) {
             printf("file does not exit...\n");

@@ -12,6 +12,7 @@
 #include <locale.h>
 
 #define ACCT_NAME_LEN 100
+#define DOC_PATH "/media/psf/Documents"
 
 typedef enum {
     bnkAcct,

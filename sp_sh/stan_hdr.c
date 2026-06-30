@@ -8,6 +8,7 @@ int stan_err(char * in_str) {
 char single_char_input(void) 
 {
     fflush(stdout);
+    
     struct termios newTerm, prevTerm;
     
     int fd = STDIN_FILENO, bytes_read;
@@ -40,8 +41,7 @@ char single_char_input(void)
     }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &prevTerm);
-    printf("%c", ch);
-    fflush(stdout);
+    printf("%c\n", ch);
 
     return ch;
 }

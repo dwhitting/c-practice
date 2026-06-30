@@ -4,8 +4,8 @@ int main() {
 
     while (1) {
         
-        printf("\n\nMenu:\n");
-        printf("(b) Bnk accts\n");
+        printf("\nMenu:\n");
+        printf("(b) Bank accts\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         char ch = single_char_input();
