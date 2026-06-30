@@ -13,6 +13,8 @@ static int free_accts(acct_type_t acct_type);
 static int update_balance(acct_type_t acct_type, char menu_sel);
 static char *get_acct_type_name(acct_type_t acct_type);
 static int update_cred_date(acct_type_t acct_type);
+static int update_acct_name(acct_type_t acct_type);
+static int print_accts_menu(acct_type_t acct_type) ;
 
 acct_t *get_acct_head(acct_type_t acct_type) {
     if (acct_type.acct_Type == bnkAcct) {
@@ -50,18 +52,21 @@ static char *get_acct_type_name(acct_type_t acct_type) {
 int accts_main(void) {
 
     while (1) {
-        printf("\nAccounts Main Menu:\n");
+        printf("\n\nAccounts Main Menu:\n");
         printf("(b) bnk accts\n");
         printf("(c) cred accts\n");
         printf("(q) quit accts\n");
+        printf("\nEnter selection: ");
         acct_type_t acct_type;
         char ch = single_char_input();
         if (ch == 'b') {
             acct_type.acct_Type = bnkAcct;
+            print_accts_menu(acct_type);
             accts_menu(acct_type);
         }
         if (ch == 'c') {
             acct_type.acct_Type = credAcct;
+            print_accts_menu(acct_type);
             accts_menu(acct_type);
         }
         if (ch == 'q') {
@@ -73,28 +78,42 @@ int accts_main(void) {
 
 }
 
-static int accts_menu(acct_type_t acct_type) {
+static int print_accts_menu(acct_type_t acct_type) {
+
     int width = 25;
+
+    printf("\n\n%s Update Menu:\n", get_acct_type_name(acct_type));
+    printf("%-*s", width, "(a) add acct ");
+    printf("(d) delete acct\n");
+    printf("%-*s", width, "(u) update balance ");
+    printf("(l) list accts\n");
+    printf("%-*s", width, "(o) load bnk accts ");
+    printf("(s) save\n");
+        if (acct_type.acct_Type == credAcct) {
+        printf("%-*s", width, "(i) update limit");
+    }
+    if (acct_type.acct_Type == credAcct) {
+        printf("(m) update day/month\n");
+    }
+    if (acct_type.acct_Type == credAcct) {
+        printf("(r) update bal remain\n");
+    }
+    printf("(n) Update acct name\n");
+    printf("%-*s", width, "(c) move row up one");
+    printf("(q) quit accts\n");
+
+    return 0;
+
+}
+
+static int accts_menu(acct_type_t acct_type) {
+    
     while (1) {
-        printf("\n%s Update Menu:\n", get_acct_type_name(acct_type));
-        printf("%-*s", width, "(a) add acct ");
-        printf("(d) delete acct\n");
-        printf("%-*s", width, "(u) update balance ");
-        printf("(l) list accts\n");
-        printf("%-*s", width, "(o) load bnk accts ");
-        printf("(s) save\n");
-            if (acct_type.acct_Type == credAcct) {
-            printf("%-*s", width, "(i) update limit");
-        }
-        if (acct_type.acct_Type == credAcct) {
-            printf("(m) update day/month\n");
-        }
-        if (acct_type.acct_Type == credAcct) {
-            printf("(r) update bal remain\n");
-        }
-        printf("(c) move row up one\n");
-        printf("(q) quit accts\n");
+
+        printf("\nEnter selection: ");
+        fflush(stdout);
         char ch = single_char_input();
+
         if (ch == 'a') {
             add_acct(acct_type);
             if (acct_type.acct_Type == credAcct) {
@@ -115,12 +134,16 @@ static int accts_menu(acct_type_t acct_type) {
             printf("\nPress key to continue...");
             fflush(stdout);
             single_char_input();
+            print_accts_menu(acct_type);
         }
         if (ch == 'm' && acct_type.acct_Type == credAcct) {
             update_cred_date(acct_type);
             if (acct_type.acct_Type == credAcct) {
                 sort_by_date(get_acct_head(acct_type));
             }
+        }
+        if (ch == 'n') {
+            update_acct_name(acct_type);
         }
         if (ch == 'o') {
             load_accts(acct_type);
@@ -139,6 +162,24 @@ static int accts_menu(acct_type_t acct_type) {
     return 0;
 }
 
+static int update_acct_name(acct_type_t acct_type) {
+
+    list_accts(acct_type);
+
+    int ud_line = raw_read_int("Enter line number: ");
+    char new_val_s[ACCT_NAME_LEN];
+    raw_read_string("\nEnter new name: ", new_val_s);
+
+    acct_t *curr = get_acct_head(acct_type);
+    for (int i = 1; i < ud_line; i++) {
+        curr = curr->next_acct;
+    }
+    
+    strcpy(curr->name, new_val_s);
+    
+    return 0;
+}
+
 static int update_cred_date(acct_type_t acct_type) {
 
     list_accts(acct_type);
@@ -154,13 +195,7 @@ static int update_cred_date(acct_type_t acct_type) {
     }
     printf("char: %c\n", day_or_month);
 
-    printf("Enter number to udpate: ");
-    fflush(stdout);
-    char ch = 'a';
-    while (!isdigit(ch)) {
-        ch = single_char_input();
-    }
-    int ud_line = ch - '0'; 
+    long ud_line = raw_read_long("Enter number to update: ");
 
     int total_nodes = num_ll(acct_type);
     if (ud_line < 1 || ud_line > total_nodes) {
@@ -168,15 +203,7 @@ static int update_cred_date(acct_type_t acct_type) {
         return 0;
     }
 
-    printf("\nEnter new value: ");
-    char new_val_s[ACCT_NAME_LEN];
-    char *endptr;
-    read_raw_line(new_val_s, ACCT_NAME_LEN);
-    int new_bal_i = strtof(new_val_s, &endptr);
-    if (new_val_s == endptr) {
-        printf("No value entered\n");
-        return 0;
-    }
+    int new_bal_i = raw_read_int("\nEnter new value: ");
 
     acct_t *curr = get_acct_head(acct_type);
 
@@ -206,13 +233,8 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
     }
 
     list_accts(acct_type);
-    printf("Enter number to udpate: ");
-    fflush(stdout);
-    char ch = 'a';
-    while (!isdigit(ch)) {
-        ch = single_char_input();
-    }
-    int ud_line = ch - '0';
+
+    int ud_line = raw_read_int("Enter number to update: ");
 
     if (ud_line < 1 || ud_line > total_nodes) {
         printf("\nSelection out of range\n");
@@ -220,25 +242,14 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         return 0;
     }
 
-    printf("\nEnter new balance: ");
-    fflush(stdout);
-    char new_bal_s[ACCT_NAME_LEN];
-    char *endptr;
-    read_raw_line(new_bal_s, ACCT_NAME_LEN);
-    float new_bal_f = strtof(new_bal_s, &endptr);
-    if (new_bal_s == endptr) {
-        printf("No value entered\n");
-        return 0;
-    }
+    float new_bal_f = raw_read_float("Enter new balance: ");
 
     acct_t *curr = get_acct_head(acct_type);
 
     if (ud_line > 1) {
-
         for (int i = 1; i < ud_line; i++) {
             curr = curr->next_acct;
         }
-        
     } 
 
     if (menu_sel == 'u') {
@@ -263,12 +274,7 @@ static int delete_acct(acct_type_t acct_type) {
     }
 
     list_accts(acct_type);
-    printf("Enter number to remove: ");
-    char ch = 'a';
-    while (!isdigit(ch)) {
-        ch = single_char_input();
-    }
-    int rem_line = ch - '0';
+    int rem_line = raw_read_int("Enter number to remove: ");
 
     if (rem_line < 1 || rem_line > total_nodes) {
         printf("\nSelection out of range\n");
@@ -355,10 +361,8 @@ static int add_acct(acct_type_t acct_type) {
     acct_t *curr = get_acct_head(acct_type);
     acct_t *head = curr;
 
-    printf("Enter acct name: ");
     char in_name[ACCT_NAME_LEN];
-    read_raw_line(in_name, ACCT_NAME_LEN);
-    in_name[strcspn(in_name, "\n")] = '\0';
+    raw_read_string("\nEnter acct name: ", in_name);
 
     if (curr == NULL) {
         curr = new_acct();
@@ -478,6 +482,7 @@ static int load_accts(acct_type_t acct_type) {
 
     close(fd);
     set_acct_head(acct_type, head);
+    
     return 0;
 
 }

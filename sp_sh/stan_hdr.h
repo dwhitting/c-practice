@@ -50,5 +50,9 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 int move_acct_up_one(acct_type_t acct_type);
 int list_accts(acct_type_t acct_type);
 acct_t *get_acct_head(acct_type_t acct_type);
+long raw_read_long(char *prompt);
+int raw_read_string(char *prompt, char *ret_string);
+int raw_read_int(char *prompt);
+float raw_read_float(char *prompt);
 
 #endif

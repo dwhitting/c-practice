@@ -7,6 +7,7 @@ int stan_err(char * in_str) {
 
 char single_char_input(void) 
 {
+    fflush(stdout);
     struct termios newTerm, prevTerm;
     
     int fd = STDIN_FILENO, bytes_read;
@@ -39,7 +40,8 @@ char single_char_input(void)
     }
 
     tcsetattr(STDIN_FILENO, TCSANOW, &prevTerm);
-    //printf("\nterminal restored\n");
+    printf("%c", ch);
+    fflush(stdout);
 
     return ch;
 }
@@ -165,6 +167,71 @@ int move_acct_up_one(acct_type_t acct_type) {
         /* head hasn't changed so not calling set_acct_head */
     }
 
+    return 0;
+}
+
+long raw_read_long(char *prompt) {
+
+    printf("%s", prompt);
+    fflush(stdout);
+    char ud_s[ACCT_NAME_LEN];
+    char *endptr;
+    read_raw_line(ud_s, ACCT_NAME_LEN);
+    long ret_long = strtol(ud_s, &endptr, 10);
+
+    if (ud_s == endptr) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    return ret_long;
+}
+
+int raw_read_int(char *prompt) {
+
+    printf("%s", prompt);
+    fflush(stdout);
+    char new_val_s[ACCT_NAME_LEN];
+    char *endptr;
+    read_raw_line(new_val_s, ACCT_NAME_LEN);
+    int new_bal_i = strtof(new_val_s, &endptr);
+    if (new_val_s == endptr) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    return new_bal_i;
+}
+
+int raw_read_string(char *prompt, char *ret_string) {
+
+    printf("%s", prompt);
+    fflush(stdout);
+    char new_val_s[ACCT_NAME_LEN];
+    read_raw_line(new_val_s, ACCT_NAME_LEN);
+    if (strlen(new_val_s) == 0) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    strcpy(ret_string, new_val_s);
 
     return 0;
+
+}
+
+float raw_read_float(char *prompt) {
+
+    printf("%s", prompt);
+    fflush(stdout);
+    char new_bal_s[ACCT_NAME_LEN];
+    char *endptr;
+    read_raw_line(new_bal_s, ACCT_NAME_LEN);
+    float new_bal_f = strtof(new_bal_s, &endptr);
+    if (new_bal_s == endptr) {
+        printf("No value entered\n");
+        return 0;
+    }
+
+    return new_bal_f;
 }
