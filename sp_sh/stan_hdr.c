@@ -125,7 +125,7 @@ int move_acct_up_one(acct_type_t acct_type) {
     char new_val_s[ACCT_NAME_LEN];
     char *endptr;
     read_raw_line(new_val_s, ACCT_NAME_LEN);
-    int new_bal_i = strtof(new_val_s, &endptr);
+    int new_bal_i = strtol(new_val_s, &endptr, 10);
     if (new_val_s == endptr) {
         printf("No value entered\n");
         return 0;
@@ -194,7 +194,7 @@ int raw_read_int(char *prompt) {
     char new_val_s[ACCT_NAME_LEN];
     char *endptr;
     read_raw_line(new_val_s, ACCT_NAME_LEN);
-    int new_bal_i = strtof(new_val_s, &endptr);
+    int new_bal_i = strtol(new_val_s, &endptr, 10);
     if (new_val_s == endptr) {
         printf("No value entered\n");
         return 0;
