@@ -235,3 +235,38 @@ float raw_read_float(char *prompt) {
 
     return new_bal_f;
 }
+
+int get_date(acct_t *ret_date) {
+    time_t raw_time;
+    struct tm *local_time;
+    
+    /* get epoch time */
+    time(&raw_time);
+
+    /* convert to local time struct */
+    local_time = localtime(&raw_time);
+
+    int day = local_time->tm_mday;
+    int month = local_time->tm_mon + 1;     // offset 0-11 to 1-12
+    int year = local_time->tm_year + 1900;  // offset since 1990
+
+    ret_date->day = day;
+    ret_date->month = month;
+    ret_date->year = year;
+
+    if (acct_type.acct_Type == credAcct) {
+        acct_t *today = malloc(sizeof(acct_t));
+        get_date(today);
+
+        strcpy(today->name, "TODAY");
+        curr_node->next_acct = today;
+
+        //printf("The curr: %s\n", curr_node->name);
+    }
+
+    /* format as date */
+    //char date_string[50];
+    //strftime(date_string, sizeof(date_string), "%m-%d-%Y", local_time);
+    
+    return 0;
+}

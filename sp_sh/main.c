@@ -8,6 +8,7 @@ int main() {
         printf("(b) Bank accts\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
+        
         char ch = single_char_input();
 
         if (ch == 'q') {

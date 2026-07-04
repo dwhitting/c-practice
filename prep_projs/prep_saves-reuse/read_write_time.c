@@ -4,7 +4,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
-#include "../hl_projs/my_timer/my_timer.h"
+#include "../../hl_projs/my_timer/my_timer.h"
 
 int mkstemp_write(char *file_name);
 int mkstemp_read(char *file_name);

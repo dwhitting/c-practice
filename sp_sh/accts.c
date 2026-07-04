@@ -414,6 +414,7 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->cred_lim, sizeof(float));
         write(fd, &curr->day, sizeof(int));
         write(fd, &curr->month, sizeof(int));
+        write(fd, &curr->year, sizeof(int));
         write(fd, &curr->cred_remain, sizeof(float));
     
         curr->next_acct = temp_save;
@@ -476,6 +477,7 @@ static int load_accts(acct_type_t acct_type) {
         read(fd, &node_read->cred_lim, sizeof(float));
         read(fd, &node_read->day, sizeof(int));
         read(fd, &node_read->month, sizeof(int));
+        read(fd, &node_read->year, sizeof(int));
         read(fd, &node_read->cred_remain, sizeof(float));
 
         node_read->next_acct = NULL;

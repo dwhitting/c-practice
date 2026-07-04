@@ -10,6 +10,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <locale.h>
+#include <time.h>
 
 #define ACCT_NAME_LEN 100
 #define DOC_PATH "/media/psf/Documents"
@@ -31,6 +32,7 @@ typedef struct _acct_t {
     char name[ACCT_NAME_LEN];
     int day;
     Month month;
+    int year;
     float balance;
     float cred_lim;
     float cred_remain;
@@ -55,5 +57,6 @@ long raw_read_long(char *prompt);
 int raw_read_string(char *prompt, char *ret_string);
 int raw_read_int(char *prompt);
 float raw_read_float(char *prompt);
+int get_date(acct_t *ret_date);
 
 #endif
