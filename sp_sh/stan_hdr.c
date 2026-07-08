@@ -253,20 +253,6 @@ int get_date(acct_t *ret_date) {
     ret_date->day = day;
     ret_date->month = month;
     ret_date->year = year;
-
-    if (acct_type.acct_Type == credAcct) {
-        acct_t *today = malloc(sizeof(acct_t));
-        get_date(today);
-
-        strcpy(today->name, "TODAY");
-        curr_node->next_acct = today;
-
-        //printf("The curr: %s\n", curr_node->name);
-    }
-
-    /* format as date */
-    //char date_string[50];
-    //strftime(date_string, sizeof(date_string), "%m-%d-%Y", local_time);
     
     return 0;
 }
