@@ -4,7 +4,7 @@ int main() {
 
     while (1) {
         
-        printf("\nMenu:\n");
+        printf("\nMenu: (***Run on Parallels [folder path]***)\n");
         printf("(b) Bank accts\n");
         printf("(l) Bills\n");
         printf("(q) Quit\n");
