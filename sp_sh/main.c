@@ -6,6 +6,7 @@ int main() {
         
         printf("\nMenu:\n");
         printf("(b) Bank accts\n");
+        printf("(l) Bills\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         
@@ -16,6 +17,8 @@ int main() {
             break;
         } else if (ch == 'b') {
             accts_main();
+        } else if (ch == 'l') {
+            bills_menu();
         }
     }
     

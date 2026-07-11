@@ -2,6 +2,7 @@
 
 static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
+static acct_t *bill_accts_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
@@ -21,6 +22,8 @@ acct_t *get_acct_head(acct_type_t acct_type) {
         return bnk_accts_ll;
     } else if (acct_type.acct_Type == credAcct) {
         return cc_accts_ll;
+    } else if (acct_type.acct_Type == billAcct) {
+        return bill_accts_ll;
     } else {
         stan_err("acct in get_acct_head not recognized");
     }
@@ -32,6 +35,8 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
         bnk_accts_ll = input_node;
     } else if (acct_type.acct_Type == credAcct) {
         cc_accts_ll = input_node;
+    } else if (acct_type.acct_Type == billAcct) {
+        bill_accts_ll = input_node;
     } else {
         stan_err("acct type in set_acct_head not recognized");
     }
@@ -43,6 +48,8 @@ static char *get_acct_type_name(acct_type_t acct_type) {
         return "Bank Account";
     } else if (acct_type.acct_Type == credAcct) {
         return "Credit Account";
+    } else if (acct_type.acct_Type == billAcct) {
+        return "Bill Account";
     } else {
         stan_err("acct type in acc_type_name not recognized");
     }
@@ -93,9 +100,6 @@ static int print_accts_menu(acct_type_t acct_type) {
         printf("%-*s", width, "(i) update limit");
     }
     if (acct_type.acct_Type == credAcct) {
-        printf("(m) update day/month\n");
-    }
-    if (acct_type.acct_Type == credAcct) {
         printf("(r) update bal remain\n");
     }
     printf("(n) Update acct name\n");
@@ -136,12 +140,6 @@ static int accts_menu(acct_type_t acct_type) {
             single_char_input();
             print_accts_menu(acct_type);
         }
-        if (ch == 'm' && acct_type.acct_Type == credAcct) {
-            update_cred_date(acct_type);
-            if (acct_type.acct_Type == credAcct) {
-                sort_by_date(get_acct_head(acct_type));
-            }
-        }
         if (ch == 'n') {
             update_acct_name(acct_type);
         }
@@ -159,6 +157,49 @@ static int accts_menu(acct_type_t acct_type) {
         }
     }
 
+    return 0;
+}
+
+int bills_menu(void) {
+
+    acct_type_t acct_type;
+    acct_type.acct_Type = billAcct;
+
+    while (1) {
+        printf("\nBills Main Menu:\n");
+        printf("(a) Add bill\n");
+        printf("(l) List bills\n");
+        printf("(m) Update month or day\n");
+        printf("(o) Load bills\n");
+        printf("(s) Save bills\n");
+
+        printf("(q) quit accts\n");
+        printf("\nEnter selection: ");
+        char ch = single_char_input();
+        if (ch == 'a') {
+            add_acct(acct_type);
+        }
+        if (ch == 'l') {
+            list_accts(acct_type);
+            printf("\nPress key to continue...");
+            fflush(stdout);
+            single_char_input();
+            print_accts_menu(acct_type);
+        }
+        if (ch == 'm') {
+            update_cred_date(acct_type);
+            sort_by_date(get_acct_head(acct_type));
+        }
+        if (ch == 'o') {
+            load_accts(acct_type);
+        }
+        if (ch == 's') {
+            save_accts(acct_type);
+        }
+        if (ch == 'q') {
+            break;
+        }
+    }
     return 0;
 }
 
@@ -335,20 +376,27 @@ int list_accts(acct_type_t acct_type) {
         curr = bnk_accts_ll;
     } else if (acct_type.acct_Type == credAcct) {
         curr = cc_accts_ll;
+    } else if (acct_type.acct_Type == billAcct) {
+        curr = bill_accts_ll;
     }
+
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
         return 0;
     }
+
     int idx = 1;
     printf("\n");
     while (curr != NULL) {
         if (acct_type.acct_Type == bnkAcct) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         } else if (acct_type.acct_Type == credAcct) {
-            char *mon = month_to_str(curr->month);
-            printf("<%d> %2d %s %-14s bal: $%.2f (remain: $%.2f)  <lim: $%.2f>\n",idx++, curr->day, mon, curr->name, 
+            printf("<%d> %-14s bal: $%.2f (remain: $%.2f)  <lim: $%.2f>\n",idx++, curr->name, 
                 curr->balance, curr->cred_remain, curr->cred_lim);
+        } else if (acct_type.acct_Type == billAcct) {
+            char *mon = month_to_str(curr->month);
+            printf("<%d> %2d %s %-14s bal: $%.2f\n",idx++, curr->day, mon, curr->name, 
+                curr->balance);
         }
         
         curr = curr->next_acct;
@@ -378,8 +426,10 @@ static int add_acct(acct_type_t acct_type) {
         strcpy(curr->next_acct->name, in_name);
         if (acct_type.acct_Type == bnkAcct) {
             bnk_accts_ll = head;
-        } else {
+        } else if (acct_type.acct_Type == credAcct) {
             cc_accts_ll = head;
+        } else if (acct_type.acct_Type == billAcct) {
+            bill_accts_ll = head;
         }
         
     }
@@ -397,11 +447,15 @@ static int save_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         char *file = "cc_data";
         snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file); 
-    }  
+    } else if (acct_type.acct_Type == billAcct) {
+        char *file = "bill_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
+    }
+
     fd = open(full_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
     if (fd < 0) {
-        stan_err("open bnk_data failed");
+        stan_err("open file to save data failed");
     }
 
     acct_t *curr = get_acct_head(acct_type);
@@ -436,6 +490,9 @@ static int load_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         char *file = "cc_data";
         snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);        
+    } else if (acct_type.acct_Type == billAcct) {
+        char *file = "bill_data";
+        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
     }
 
     fd = open(full_path, O_RDONLY);
@@ -445,7 +502,7 @@ static int load_accts(acct_type_t acct_type) {
             printf("file does not exit...\n");
             return 0;
         } else {
-            stan_err("open bnk_data failed");
+            stan_err("open file data failed");
             return -1;
         }
         

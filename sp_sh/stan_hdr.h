@@ -17,7 +17,8 @@
 
 typedef enum {
     bnkAcct,
-    credAcct
+    credAcct,
+    billAcct
 } AcctType;
 
 typedef enum {
@@ -44,6 +45,7 @@ int stan_err(char * in_str);
 char single_char_input(void);
 
 int accts_main(void);
+int bills_menu(void);
 int accts_exit(void);
 void read_raw_line(char *buffer, size_t max_len);
 char *month_to_str(Month in_month);
