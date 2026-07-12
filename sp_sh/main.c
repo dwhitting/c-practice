@@ -7,6 +7,7 @@ int main() {
         printf("\nMenu: (***Run on Parallels [folder path]***)\n");
         printf("(b) Bank accts\n");
         printf("(l) Bills\n");
+        printf("(d) Display\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         
@@ -19,6 +20,8 @@ int main() {
             accts_main();
         } else if (ch == 'l') {
             bills_menu();
+        } else if (ch == 'd') {
+            display_main();
         }
     }
     

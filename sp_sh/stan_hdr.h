@@ -60,5 +60,7 @@ int raw_read_string(char *prompt, char *ret_string);
 int raw_read_int(char *prompt);
 float raw_read_float(char *prompt);
 int get_date(acct_t *ret_date);
+int load_accts(acct_type_t acct_type);
+int display_main(void);
 
 #endif
