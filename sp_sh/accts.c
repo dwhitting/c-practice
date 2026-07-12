@@ -578,8 +578,10 @@ static int free_accts(acct_type_t acct_type) {
 int accts_exit(void) {
     acct_type_t bnk = {.acct_Type = bnkAcct};
     acct_type_t cred = {.acct_Type = credAcct};
+    acct_type_t bills = {.acct_Type = billAcct};
     free_accts(bnk);
     free_accts(cred);
+    free_accts(bills);
 
     return 0;
 }
