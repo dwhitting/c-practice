@@ -59,7 +59,7 @@ int display_main(void) {
         accts_combined_val -= curr->balance;
         float_to_currency(curr->balance, temp_curr_1);
         float_to_currency(accts_combined_val, temp_curr_2);
-        printf("%2d %s %4d %-25s%15s, New Total: %s\n",curr->day, month_to_str(curr->month), 
+        printf("%2d %s %4d %-30s%10s, New Total: %s\n",curr->day, month_to_str(curr->month), 
             curr->year, curr->name, temp_curr_1, temp_curr_2);
         if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
             printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
