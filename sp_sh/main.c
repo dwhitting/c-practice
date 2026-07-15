@@ -10,6 +10,12 @@ int main() {
         printf("(d) Display\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
+
+        // float t = 1.32;
+        // char test[STR_NUM_LEN];
+        // float_to_currency(t, test);
+        // printf("test: %s\n", test);
+        // fflush(stdout);
         
         char ch = single_char_input();
 

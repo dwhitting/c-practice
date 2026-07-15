@@ -7,6 +7,9 @@ int display_main(void) {
         load_accts(acct_type);
     }
 
+    char temp_curr_1[STR_NUM_LEN], 
+         temp_curr_2[STR_NUM_LEN];  /* used to store all floats converted to string currency */
+
     /* list bank accounts */
     acct_t *curr;
     acct_type.acct_Type = bnkAcct;
@@ -15,11 +18,13 @@ int display_main(void) {
     float bank_total = 0.0;
     printf("\nBank Accounts:\n");
     while (curr != NULL) {
-        printf("%-14s %15.2f\n", curr->name, curr->balance);
+        float_to_currency(curr->balance, temp_curr_1);
+        printf("%-14s %15s\n", curr->name, temp_curr_1);
         bank_total += curr->balance;
         curr = curr->next_acct;
     }
-    printf("          Total: %13.2f\n", bank_total);
+    float_to_currency(bank_total, temp_curr_1);
+    printf("          Total: %13s\n", temp_curr_1);
 
     /* list credit card accounts */
     acct_type.acct_Type = credAcct;
@@ -31,14 +36,17 @@ int display_main(void) {
     printf("Name\t\t   Cred Used\n");
     while (curr != NULL) {
         cc_used = curr->cred_lim - curr->cred_remain;
-        printf("%-14s%15.2f\n", curr->name, cc_used);
+        float_to_currency(cc_used, temp_curr_1);
+        printf("%-14s%15s\n", curr->name, temp_curr_1);
         cc_used_total += cc_used;
         curr = curr->next_acct;
     }
-    printf("         Total: %13.2f\n", cc_used_total);
+    float_to_currency(cc_used_total, temp_curr_1);
+    printf("         Total: %13s\n", temp_curr_1);
 
     float accts_combined_val = bank_total - cc_used_total;
-    printf("\n Combined Accts Val: $%.2f\n", accts_combined_val);
+    float_to_currency(accts_combined_val, temp_curr_1);
+    printf("\n Combined Accts Val: $%s\n", temp_curr_1);
 
     /* list bills */
     acct_type.acct_Type = billAcct;
@@ -49,8 +57,10 @@ int display_main(void) {
     printf("\nBills:\n");
     while (curr != NULL) {
         accts_combined_val -= curr->balance;
-        printf("%2d %s %4d %-14s%15.2f, New Total: $%.2f\n",curr->day, month_to_str(curr->month), 
-            curr->year, curr->name, curr->balance, accts_combined_val);
+        float_to_currency(curr->balance, temp_curr_1);
+        float_to_currency(accts_combined_val, temp_curr_2);
+        printf("%2d %s %4d %-14s%15s, New Total: %s\n",curr->day, month_to_str(curr->month), 
+            curr->year, curr->name, temp_curr_1, temp_curr_2);
         if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
             printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
         } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {

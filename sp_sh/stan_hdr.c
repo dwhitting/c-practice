@@ -257,3 +257,43 @@ int get_date(acct_t *ret_date) {
     
     return 0;
 }
+
+int float_to_currency(float in_num, char *ret_str) {
+    if (in_num == 0.0f) {
+        strcpy(ret_str, "$0.00");
+        return 0;
+    }
+
+    int negative = in_num < 0;
+    char temp_str[STR_NUM_LEN] = "";
+    snprintf(temp_str, STR_NUM_LEN, "%.2f", fabsf(in_num));
+    int s_len = strlen(temp_str);
+    char cat_str[STR_NUM_LEN] = "\0";
+
+    strcat(cat_str, temp_str + (s_len - 3)); /* ".dd" */
+
+    int int_len = s_len - 3;  /* number of integer digits */
+    int digits_done = 0;
+    for (int k = 1; k <= int_len; k++) {
+        if (digits_done % 3 == 0 && digits_done > 0) {
+            memmove(cat_str + 1, cat_str, strlen(cat_str) + 1);
+            cat_str[0] = ',';
+        }
+        memmove(cat_str + 1, cat_str, strlen(cat_str) + 1);
+        cat_str[0] = temp_str[int_len - k];
+        digits_done++;
+
+    }
+
+    memmove(cat_str + 1, cat_str, strlen(cat_str) + 1);
+    cat_str[0] = '$';
+
+    if (negative) {
+        memmove(cat_str + 1, cat_str, strlen(cat_str) + 1);
+        cat_str[0] = '-';
+    }
+
+    strcpy(ret_str, cat_str);
+
+    return 0;
+}

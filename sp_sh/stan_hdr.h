@@ -11,8 +11,10 @@
 #include <ctype.h>
 #include <locale.h>
 #include <time.h>
+#include <math.h>
 
 #define ACCT_NAME_LEN 100
+#define STR_NUM_LEN 20
 #define DOC_PATH "/media/psf/Documents"
 
 typedef enum {
@@ -62,5 +64,6 @@ float raw_read_float(char *prompt);
 int get_date(acct_t *ret_date);
 int load_accts(acct_type_t acct_type);
 int display_main(void);
+int float_to_currency(float in_num, char *ret_str);
 
 #endif
