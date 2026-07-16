@@ -2,20 +2,17 @@
 
 int main() {
 
+    load_all_accts();
+
     while (1) {
         
         printf("\nMenu: (***Run on Parallels [folder path]***)\n");
         printf("(b) Bank accts\n");
         printf("(l) Bills\n");
+        printf("(i) Income\n");
         printf("(d) Display\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
-
-        // float t = 1.32;
-        // char test[STR_NUM_LEN];
-        // float_to_currency(t, test);
-        // printf("test: %s\n", test);
-        // fflush(stdout);
         
         char ch = single_char_input();
 
@@ -26,6 +23,8 @@ int main() {
             accts_main();
         } else if (ch == 'l') {
             bills_menu();
+        } else if (ch == 'i') {
+            income_menu();
         } else if (ch == 'd') {
             display_main();
         }

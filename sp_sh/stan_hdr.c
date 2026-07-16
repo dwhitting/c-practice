@@ -79,9 +79,7 @@ char *month_to_str(Month in_month) {
     }
 }
 
-int sort_by_date(acct_t *input_head) {
-    acct_type_t acct_type;
-    acct_type.acct_Type = billAcct;
+int sort_by_date(acct_type_t acct_type, acct_t *input_head) {
 
     /* zero or 1 elements already sorted */
     if (input_head == NULL || input_head->next_acct == NULL) {

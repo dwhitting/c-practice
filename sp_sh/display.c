@@ -48,11 +48,27 @@ int display_main(void) {
     float_to_currency(accts_combined_val, temp_curr_1);
     printf("\n Combined Accts Val: $%s\n", temp_curr_1);
 
+    /* list income */
+    acct_type.acct_Type = incomeAcct;
+    curr = get_acct_head(acct_type);
+
+    float income_total = 0.0;
+    printf("\nIncome:\n");
+    while (curr != NULL) {
+        float_to_currency(curr->balance, temp_curr_1);
+        printf("%-14s %15s\n", curr->name, temp_curr_1);
+        income_total += curr->balance;
+        curr = curr->next_acct;
+    }
+    float_to_currency(income_total, temp_curr_1);
+    printf("          Total: %13s\n", temp_curr_1);
+
+
     /* list bills */
     acct_type.acct_Type = billAcct;
     acct_t *today = malloc(sizeof(acct_t));
     get_date(today);
-    sort_by_date(get_acct_head(acct_type));
+    sort_by_date(acct_type, get_acct_head(acct_type));
     curr = get_acct_head(acct_type);
     printf("\nBills:\n");
     while (curr != NULL) {
@@ -68,6 +84,10 @@ int display_main(void) {
         }
         curr = curr->next_acct;
     }
+    float total = total_bills();
+    char s_total[STR_NUM_LEN];
+    float_to_currency(total, s_total);
+    printf("\nTotal Bills: %s\n", s_total);
 
 
 

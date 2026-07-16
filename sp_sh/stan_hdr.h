@@ -20,7 +20,8 @@
 typedef enum {
     bnkAcct,
     credAcct,
-    billAcct
+    billAcct,
+    incomeAcct
 } AcctType;
 
 typedef enum {
@@ -51,7 +52,7 @@ int bills_menu(void);
 int accts_exit(void);
 void read_raw_line(char *buffer, size_t max_len);
 char *month_to_str(Month in_month);
-int sort_by_date(acct_t *input_head);
+int sort_by_date(acct_type_t acct_type, acct_t *input_head);
 int num_ll(acct_type_t acct_type);
 int set_acct_head(acct_type_t acct_type, acct_t *input_node);
 int move_acct_up_one(acct_type_t acct_type);
@@ -66,5 +67,7 @@ int load_accts(acct_type_t acct_type);
 int display_main(void);
 int float_to_currency(float in_num, char *ret_str);
 float total_bills(void);
+int load_all_accts(void);
+int income_menu(void);
 
 #endif

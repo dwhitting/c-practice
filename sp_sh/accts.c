@@ -3,6 +3,7 @@
 static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
+static acct_t *income_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
@@ -23,6 +24,8 @@ acct_t *get_acct_head(acct_type_t acct_type) {
         return cc_accts_ll;
     } else if (acct_type.acct_Type == billAcct) {
         return bill_accts_ll;
+    } else if (acct_type.acct_Type == incomeAcct) {
+        return income_ll;
     } else {
         stan_err("acct in get_acct_head not recognized");
     }
@@ -36,6 +39,8 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
         cc_accts_ll = input_node;
     } else if (acct_type.acct_Type == billAcct) {
         bill_accts_ll = input_node;
+    } else if (acct_type.acct_Type == incomeAcct) {
+        income_ll = input_node;
     } else {
         stan_err("acct type in set_acct_head not recognized");
     }
@@ -49,6 +54,8 @@ static char *get_acct_type_name(acct_type_t acct_type) {
         return "Credit Account";
     } else if (acct_type.acct_Type == billAcct) {
         return "Bill Account";
+    } else if (acct_type.acct_Type == incomeAcct) {
+        return "Income Account";
     } else {
         stan_err("acct type in acc_type_name not recognized");
     }
@@ -59,9 +66,9 @@ int accts_main(void) {
 
     while (1) {
         printf("\nAccounts Main Menu:\n");
-        printf("(b) bnk accts\n");
-        printf("(c) cred accts\n");
-        printf("(q) quit accts\n");
+        printf("(b) Bank\n");
+        printf("(c) Credit\n");
+        printf("(q) quit\n");
         printf("\nEnter selection: ");
         acct_type_t acct_type;
         char ch = single_char_input();
@@ -172,6 +179,7 @@ int bills_menu(void) {
         printf("(n) Update name\n");
         printf("(o) Load bills\n");
         printf("(s) Save bills\n");
+        printf("(d) Delete bill\n");
 
         printf("(q) quit accts\n");
         printf("\nEnter selection: ");
@@ -188,7 +196,7 @@ int bills_menu(void) {
         }
         if (ch == 'm') {
             update_cred_date(acct_type);
-            sort_by_date(get_acct_head(acct_type));
+            sort_by_date(acct_type, get_acct_head(acct_type));
         }
         if (ch == 'n') {
             update_acct_name(acct_type);
@@ -202,10 +210,68 @@ int bills_menu(void) {
         if (ch == 'u') {
             update_balance(acct_type, ch);
         }
+        if (ch == 'd') {
+            delete_acct(acct_type);
+        }
         if (ch == 'q') {
             break;
         }
     }
+    return 0;
+}
+
+int income_menu(void) {
+    acct_type_t acct_type;
+    acct_type.acct_Type = incomeAcct;
+
+    while (1) {
+        printf("\nIncome Main Menu:\n");
+        printf("(a) Add Income\n");
+        printf("(l) List Income(s)\n");
+        printf("(u) Update balance\n");
+        printf("(m) Update month, day, or year\n");
+        printf("(n) Update name\n");
+        printf("(o) Load Income(s)\n");
+        printf("(s) Save Income(s)\n");
+        printf("(d) Delete Income\n");
+
+        printf("(q) quit Income\n");
+        printf("\nEnter selection: ");
+        char ch = single_char_input();
+        if (ch == 'a') {
+            add_acct(acct_type);
+        }
+        if (ch == 'l') {
+            list_accts(acct_type);
+            printf("\nPress key to continue...");
+            fflush(stdout);
+            single_char_input();
+            print_accts_menu(acct_type);
+        }
+        if (ch == 'm') {
+            update_cred_date(acct_type);
+            sort_by_date(acct_type, get_acct_head(acct_type));
+        }
+        if (ch == 'n') {
+            update_acct_name(acct_type);
+        }
+        if (ch == 'o') {
+            load_accts(acct_type);
+        }
+        if (ch == 's') {
+            save_accts(acct_type);
+        }
+        if (ch == 'u') {
+            update_balance(acct_type, ch);
+        }
+        if (ch == 'd') {
+            delete_acct(acct_type);
+        }
+        if (ch == 'q') {
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -365,11 +431,13 @@ int num_ll(acct_type_t acct_type) {
 
 static acct_t *new_acct(void) {
     acct_t *new_a = (acct_t *)malloc(sizeof(acct_t));
+    
     strcpy(new_a->name, "<no name>");
     new_a->balance = 0.0;
     new_a->cred_lim = 0.0;
-    new_a->day = 1;
+    new_a->day = 0;
     new_a->month = 0;
+    new_a->year = 0;
     new_a->cred_remain = 0.0;
     new_a->date_sort = 0;
     new_a->next_acct = NULL;
@@ -386,6 +454,8 @@ int list_accts(acct_type_t acct_type) {
         curr = cc_accts_ll;
     } else if (acct_type.acct_Type == billAcct) {
         curr = bill_accts_ll;
+    } else if (acct_type.acct_Type == incomeAcct) {
+        curr = income_ll;
     }
 
     if (curr == NULL) {
@@ -405,6 +475,10 @@ int list_accts(acct_type_t acct_type) {
             char *mon = month_to_str(curr->month);
             printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
                 curr->balance);
+        } else if (acct_type.acct_Type == incomeAcct) {
+            char *mon = month_to_str(curr->month);
+            printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
+                curr->balance);      
         }
         
         curr = curr->next_acct;
@@ -424,6 +498,9 @@ static int add_acct(acct_type_t acct_type) {
     acct_t *curr = get_acct_head(acct_type);
     acct_t *head = curr;
 
+    acct_t *today = (acct_t *)malloc(sizeof(acct_t));
+    get_date(today);
+
     char in_name[ACCT_NAME_LEN];
     raw_read_string("\nEnter acct name: ", in_name);
 
@@ -431,6 +508,9 @@ static int add_acct(acct_type_t acct_type) {
         curr = new_acct();
         printf("First account...\n");
         strcpy(curr->name, in_name); 
+        curr->day = today->day;
+        curr->month = today->month;
+        curr->year = today->year;
         set_acct_head(acct_type, curr);
     } else {
         while (curr->next_acct != NULL) {
@@ -439,12 +519,17 @@ static int add_acct(acct_type_t acct_type) {
         curr->next_acct = new_acct();
 
         strcpy(curr->next_acct->name, in_name);
+        curr->next_acct->day = today->day;
+        curr->next_acct->month = today->month;
+        curr->next_acct->year = today->year;
         if (acct_type.acct_Type == bnkAcct) {
             bnk_accts_ll = head;
         } else if (acct_type.acct_Type == credAcct) {
             cc_accts_ll = head;
         } else if (acct_type.acct_Type == billAcct) {
             bill_accts_ll = head;
+        } else if (acct_type.acct_Type == incomeAcct) {
+            income_ll = head;
         }
         
     }
@@ -455,17 +540,18 @@ static int add_acct(acct_type_t acct_type) {
 static int save_accts(acct_type_t acct_type) {
     
     int fd;
-    char full_path[ACCT_NAME_LEN];
+    char full_path[200];     /* since file is 100 */
+    char file[ACCT_NAME_LEN];
     if (acct_type.acct_Type == bnkAcct) {
-        char *file = "bnk_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
+        strcpy(file, "bnk_data");
     } else if (acct_type.acct_Type == credAcct) {
-        char *file = "cc_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file); 
+        strcpy(file, "cc_data");
     } else if (acct_type.acct_Type == billAcct) {
-        char *file = "bill_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
+        strcpy(file, "bill_data");
+    } else if (acct_type.acct_Type == incomeAcct) {
+        strcpy(file, "income_data");
     }
+    snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
@@ -495,20 +581,39 @@ static int save_accts(acct_type_t acct_type) {
     return 0;
 }
 
+int load_all_accts(void) {
+    acct_type_t acct_type;
+
+    acct_type.acct_Type = bnkAcct;
+    load_accts(acct_type);
+
+    acct_type.acct_Type = credAcct;
+    load_accts(acct_type);
+
+    acct_type.acct_Type = billAcct;
+    load_accts(acct_type);
+
+    acct_type.acct_Type = incomeAcct;
+    load_accts(acct_type);
+
+    return 0;
+}
+
 int load_accts(acct_type_t acct_type) {
 
     int fd;
-    char full_path[ACCT_NAME_LEN];
+    char full_path[200];   /* since file is 100 */
+    char file[ACCT_NAME_LEN];
     if (acct_type.acct_Type == bnkAcct) {
-        char *file = "bnk_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
+        strcpy(file, "bnk_data");
     } else if (acct_type.acct_Type == credAcct) {
-        char *file = "cc_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);        
+        strcpy(file, "cc_data");      
     } else if (acct_type.acct_Type == billAcct) {
-        char *file = "bill_data";
-        snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
+        strcpy(file, "bill_data");
+    } else if (acct_type.acct_Type == incomeAcct) {
+        strcpy(file, "income_data");
     }
+    snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_RDONLY);
 
@@ -590,9 +695,11 @@ int accts_exit(void) {
     acct_type_t bnk = {.acct_Type = bnkAcct};
     acct_type_t cred = {.acct_Type = credAcct};
     acct_type_t bills = {.acct_Type = billAcct};
+    acct_type_t income = {.acct_Type = incomeAcct};
     free_accts(bnk);
     free_accts(cred);
     free_accts(bills);
+    free_accts(income);
 
     return 0;
 }
