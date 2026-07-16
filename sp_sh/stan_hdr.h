@@ -65,5 +65,6 @@ int get_date(acct_t *ret_date);
 int load_accts(acct_type_t acct_type);
 int display_main(void);
 int float_to_currency(float in_num, char *ret_str);
+float total_bills(void);
 
 #endif

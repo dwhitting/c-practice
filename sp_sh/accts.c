@@ -410,6 +410,13 @@ int list_accts(acct_type_t acct_type) {
         curr = curr->next_acct;
     }
 
+    if (acct_type.acct_Type == billAcct) {
+        float total = total_bills();
+        char s_total[STR_NUM_LEN];
+        float_to_currency(total, s_total);
+        printf("\nTotal Bills: %s\n", s_total);
+    }
+
     return 0;
 }
 
@@ -588,4 +595,17 @@ int accts_exit(void) {
     free_accts(bills);
 
     return 0;
+}
+
+float total_bills(void) {
+    acct_type_t acct_type = {.acct_Type = billAcct};
+    acct_t *curr = get_acct_head(acct_type);
+    float sum = 0.0;
+
+    while (curr != NULL) {
+        sum += curr->balance;
+        curr = curr->next_acct;
+    }
+    
+    return sum;
 }
