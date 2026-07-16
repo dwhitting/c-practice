@@ -82,6 +82,10 @@ int display_main(void) {
         } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {
             printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
         }
+        if ((curr->next_acct != NULL) && (curr->month < curr->next_acct->month)) {
+            printf("*** End of Month ***\n");
+        }
+
         curr = curr->next_acct;
     }
     float bill_total = total_bills();
