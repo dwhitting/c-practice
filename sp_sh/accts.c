@@ -169,6 +169,7 @@ int bills_menu(void) {
         printf("(l) List bills\n");
         printf("(u) Update balance\n");
         printf("(m) Update month, day, or year\n");
+        printf("(n) Update name\n");
         printf("(o) Load bills\n");
         printf("(s) Save bills\n");
 
@@ -188,6 +189,9 @@ int bills_menu(void) {
         if (ch == 'm') {
             update_cred_date(acct_type);
             sort_by_date(get_acct_head(acct_type));
+        }
+        if (ch == 'n') {
+            update_acct_name(acct_type);
         }
         if (ch == 'o') {
             load_accts(acct_type);
@@ -399,7 +403,7 @@ int list_accts(acct_type_t acct_type) {
                 (curr->cred_lim - curr->cred_remain), curr->cred_remain, curr->cred_lim);
         } else if (acct_type.acct_Type == billAcct) {
             char *mon = month_to_str(curr->month);
-            printf("<%d> %2d %s %4d %-14s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
+            printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
                 curr->balance);
         }
         
