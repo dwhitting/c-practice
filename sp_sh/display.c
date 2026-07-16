@@ -84,12 +84,18 @@ int display_main(void) {
         }
         curr = curr->next_acct;
     }
-    float total = total_bills();
+    float bill_total = total_bills();
     char s_total[STR_NUM_LEN];
-    float_to_currency(total, s_total);
+    float_to_currency(bill_total, s_total);
     printf("\nTotal Bills: %s\n", s_total);
 
+    float inc_minus_bills = income_total - bill_total;
+    float_to_currency(inc_minus_bills, s_total);
+    printf("\nIncome - Bills: %s\n", s_total);
 
+    float per_day = inc_minus_bills / 30; /* temp div day (month) */
+    float_to_currency(per_day, s_total);
+    printf("Per Day: %s\n", s_total);
 
     printf("\nPress key to continue...");
     fflush(stdout);
