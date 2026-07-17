@@ -1,37 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <signal.h>
+#include <string.h>
 
-static void sigHandler(int sig) {
-    static int count = 0;
+typedef struct {
+    int one;
+    char strng[1024];
+} the_struct_t;
 
-    /* Unsafe. Uses non-async sig functions */
-    if (sig == SIGINT) {
-        count++;
-        printf("Caught SIGINT (%d)\n", count);
-        return;     /* resumes at point of interupt */
-    }
-
-    /* must be SIGQUIT if gets here */
-    printf("Caught SIGQUIT\n");
-    exit(EXIT_SUCCESS);
-}
 
 int main() {
 
-    if (signal(SIGINT, sigHandler) == SIG_ERR) {
-        perror("signal");
-        exit(1);
-    }
+    the_struct_t *one = malloc(100000 * sizeof(the_struct_t));
+    strcpy(one[100000 - 1].strng, "Yo");
 
-    if (signal(SIGQUIT, sigHandler) == SIG_ERR) {
-        perror("signal");
-    }
+   printf("Test %s\n", one[100000 - 1].strng);
+   printf("Size: %lu\n", sizeof(*one));
 
-    for (;;)        
-        pause();    /* blocks until signal is caught */
+   free(one);
     
     return 0;
 }
