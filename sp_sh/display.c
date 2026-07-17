@@ -47,22 +47,27 @@ int display_main(void) {
     acct_t *today = malloc(sizeof(acct_t));
     get_date(today);
     int days_til_month_end = last_day_curr_month() - today->day;
-    free(today);
+    char s_curr_mon[STR_NUM_LEN];
+    strcpy(s_curr_mon, month_to_str(today->month));
 
     float total_daily_adjust = days_til_month_end * per_day;
     char s_total_daily_adjust[STR_NUM_LEN] = "";
     float_to_currency(total_daily_adjust, s_total_daily_adjust);
 
     float_to_currency(end_of_month, s_total);
-    printf("\nPre-end of month: %s (-%s)(%d(s)) (Day: %d)\n", 
-        s_total, s_total_daily_adjust, days_til_month_end, month_last_day);
+    printf("\nPre-end of month: %s (-%s)(%d(s)) (Date: %d %s)\n", 
+        s_total, s_total_daily_adjust, days_til_month_end, 
+        month_last_day, s_curr_mon);
     float est_end_of_month = end_of_month - total_daily_adjust;
     float_to_currency(est_end_of_month, s_total);
-    printf("* Final End of Month: %s\n", s_total);
+    printf("%d %s %d Final End of Month: %s\n",today->day, s_curr_mon, 
+        today->year, s_total);
 
     printf("\nPress key to continue...");
     fflush(stdout);
     single_char_input();
+
+    free(today);
 
     return 0;
 }
