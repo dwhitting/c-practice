@@ -62,7 +62,7 @@ static int list_bank_accts(float *bank_total) {
     curr = get_acct_head(acct_type);
 
     
-    printf("\nBank Accounts:\n");
+    printf("\n      Bank Accounts:\n");
     while (curr != NULL) {
         float_to_currency(curr->balance, temp_curr_1);
         printf("%-14s %15s\n", curr->name, temp_curr_1);
@@ -85,7 +85,7 @@ static int list_cc_accts(float *cc_used_total) {
     curr = get_acct_head(acct_type);
 
     float cc_used = 0.0;
-    printf("\nCredit Cards:\n");
+    printf("\n      Credit Cards:\n");
     printf("Name\t\t   Cred Used\n");
     while (curr != NULL) {
         cc_used = curr->cred_lim - curr->cred_remain;
@@ -110,7 +110,7 @@ static int list_income(float *income_total) {
     curr = get_acct_head(acct_type);
 
     
-    printf("\nIncome:\n");
+    printf("\n      Income:\n");
     while (curr != NULL) {
         float_to_currency(curr->balance, temp_curr_1);
         printf("%-14s %15s\n", curr->name, temp_curr_1);
@@ -146,7 +146,7 @@ static int list_bills(float *end_of_month, float accts_combined_val, float per_d
     char s_per_day[STR_NUM_LEN] = "";
     float_to_currency(per_day, s_per_day);
 
-    printf("\nBills:\n");
+    printf("\n      Bills:\n");
 
     while (curr != NULL) {
 
@@ -158,6 +158,14 @@ static int list_bills(float *end_of_month, float accts_combined_val, float per_d
 
         float_to_currency(curr->balance, temp_curr_1);
         float_to_currency(accts_combined_val, temp_curr_2);
+
+        if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
+            printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
+        } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {
+            printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
+        } else if (curr == bill_head && bill_head->date_sort > today->date_sort) {
+            printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
+        }
 
         printf("%2d %s %4d %-30s%10s, Actual: %s",curr->day, month_to_str(curr->month), 
             curr->year, curr->name, temp_curr_1, temp_curr_2);
@@ -181,11 +189,6 @@ static int list_bills(float *end_of_month, float accts_combined_val, float per_d
             income = income->next_acct;
         }
 
-        if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
-            printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
-        } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {
-            printf("TODAY: %2d %s %4d\n", today->day, month_to_str(today->month), today->year);
-        }
         if ((curr->next_acct != NULL) && (curr->month < curr->next_acct->month)) {
             printf("*** End of Month ***\n");
             *end_of_month = accts_combined_val;
