@@ -69,5 +69,6 @@ int float_to_currency(float in_num, char *ret_str);
 float total_bills(void);
 int load_all_accts(void);
 int income_menu(void);
+int last_day_curr_month(void);
 
 #endif

@@ -295,3 +295,23 @@ int float_to_currency(float in_num, char *ret_str) {
 
     return 0;
 }
+
+int last_day_curr_month(void) {
+
+    time_t now = time(NULL);
+    struct tm tm_date = *localtime(&now);
+
+    int curr_month = tm_date.tm_mon;  
+
+    int idx_mon = curr_month;
+    int idx_day;
+    while (curr_month == idx_mon) {
+        idx_day = tm_date.tm_mday; 
+        tm_date.tm_mday += 1;
+        mktime(&tm_date);
+        idx_mon = tm_date.tm_mon;
+    };
+
+    return idx_day;
+
+}
