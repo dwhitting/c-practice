@@ -333,6 +333,9 @@ static int update_cred_date(acct_type_t acct_type) {
     } else if (day_or_month == 'y') {
         curr->year = new_bal_i;
     }
+    curr->date_sort = (10000 * curr->year) + (100 * curr->month) + curr->day; 
+
+    printf("\n date sort: %d\n", curr->date_sort);
 
     printf("\nAcct updated\n");
 
@@ -511,6 +514,7 @@ static int add_acct(acct_type_t acct_type) {
         curr->day = today->day;
         curr->month = today->month;
         curr->year = today->year;
+        curr->date_sort = (10000 * curr->year) + (100 * curr->month) + curr->day; 
         set_acct_head(acct_type, curr);
     } else {
         while (curr->next_acct != NULL) {
@@ -522,6 +526,7 @@ static int add_acct(acct_type_t acct_type) {
         curr->next_acct->day = today->day;
         curr->next_acct->month = today->month;
         curr->next_acct->year = today->year;
+        curr->date_sort = (10000 * curr->year) + (100 * curr->month) + curr->day; 
         if (acct_type.acct_Type == bnkAcct) {
             bnk_accts_ll = head;
         } else if (acct_type.acct_Type == credAcct) {
@@ -570,6 +575,7 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->day, sizeof(int));
         write(fd, &curr->month, sizeof(int));
         write(fd, &curr->year, sizeof(int));
+        write(fd, &curr->date_sort, sizeof(int));
         write(fd, &curr->cred_remain, sizeof(float));
     
         curr->next_acct = temp_save;
@@ -655,6 +661,7 @@ int load_accts(acct_type_t acct_type) {
         read(fd, &node_read->day, sizeof(int));
         read(fd, &node_read->month, sizeof(int));
         read(fd, &node_read->year, sizeof(int));
+        read(fd, &node_read->date_sort, sizeof(int));
         read(fd, &node_read->cred_remain, sizeof(float));
 
         node_read->next_acct = NULL;
