@@ -240,22 +240,22 @@ acct_type_t acct_type;
 
     while (1) {
         printf("\nRecords Main Menu:\n");
-        printf("(a) Add Record\n");
+        //printf("(a) Add Record\n");
         printf("(l) List Record(s)\n");
-        printf("(u) Update Balance\n");
-        printf("(m) Update month, day, or year\n");
-        printf("(n) Update name\n");
+        printf("(u) Update Final EOM\n");
+        printf("(m) Update Month, Day, or Year\n");
+        printf("(n) Update Main Text\n");
         printf("(o) Load Record(s)\n");
-        printf("(t) Update note\n");
+        printf("(t) Update Note\n");
         printf("(s) Save Record(s)\n");
         printf("(d) Delete Record\n");
 
         printf("(q) Quit Records\n");
         printf("\nEnter selection: ");
         char ch = single_char_input();
-        if (ch == 'a') {
-            add_acct(acct_type);
-        }
+        // if (ch == 'a') {
+        //     add_acct(acct_type);
+        // }
         if (ch == 'l') {
             list_accts(acct_type);
             printf("\nPress key to continue...");
@@ -551,6 +551,7 @@ int list_accts(acct_type_t acct_type) {
         curr = income_ll;
     } else if (acct_type.acct_Type == recordAcct) {
         curr = long_term_record_ll;
+        update_day_change();
     }
 
     if (curr == NULL) {
@@ -576,18 +577,25 @@ int list_accts(acct_type_t acct_type) {
                 curr->balance);      
         } else if (acct_type.acct_Type == recordAcct) {
             char *mon = month_to_str(curr->month);
-            printf("<%2d> %2d %s %4d %-30s bal: $%.2f Note: %s\n",idx++, curr->day, mon, curr->year, curr->name, 
-                curr->balance, curr->note);                
+            printf("<%2d> %2d %s %4d Bal: $%.2f, %-30s $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
+                curr->balance, curr->name, curr->cred_remain, curr->note);                
         }
         
         curr = curr->next_acct;
     }
 
     if (acct_type.acct_Type == billAcct) {
-        float total = total_bills();
+        float total = total_acct_balance(acct_type);
         char s_total[STR_NUM_LEN];
         float_to_currency(total, s_total);
         printf("\nTotal Bills: %s\n", s_total);
+    }
+
+    if (acct_type.acct_Type == recordAcct) {
+        float total = total_acct_balance(acct_type);
+        char s_total[STR_NUM_LEN];
+        float_to_currency(total, s_total);
+        printf("\nTotal change: %s\n", s_total);        
     }
 
     return 0;
@@ -819,8 +827,8 @@ int accts_exit(void) {
     return 0;
 }
 
-float total_bills(void) {
-    acct_type_t acct_type = {.acct_Type = billAcct};
+float total_acct_balance(acct_type_t acct_type) {
+
     acct_t *curr = get_acct_head(acct_type);
     float sum = 0.0;
 
@@ -830,4 +838,26 @@ float total_bills(void) {
     }
     
     return sum;
+}
+
+int update_day_change(void) {
+    acct_t *records_head;
+    acct_type_t acct_type = {.acct_Type = recordAcct};
+    records_head = get_acct_head(acct_type);
+    acct_t *curr = records_head;
+
+    if (records_head == NULL) {
+        printf("*** Records linked list is NULL\n");
+        return 0;
+    }
+
+    float prev_bal = 0.0;
+    curr->cred_remain = 0.0;
+    while (curr->next_acct != NULL) {
+        prev_bal = curr->balance;
+        curr = curr->next_acct;
+        curr->cred_remain = curr->balance - prev_bal;
+    }
+
+    return 0;
 }

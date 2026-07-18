@@ -4,7 +4,7 @@ static int list_bank_accts(float *bank_total);
 static int list_cc_accts(float *cc_used_total);
 static int list_income(float *income_total);
 static int list_bills(float *end_of_month, float accts_combined_val);
-static int add_record(void);
+static int add_record(float est_EOM, float per_day, int days_til_EOM);
 
 int display_main(void) {
 
@@ -27,7 +27,8 @@ int display_main(void) {
     float income_total = 0.0;
     list_income(&income_total);
 
-    float bill_total = total_bills();
+    acct_type_t bills_acct_type = {.acct_Type = billAcct};
+    float bill_total = total_acct_balance(bills_acct_type);
     char s_total[STR_NUM_LEN];
     float inc_minus_bills = income_total - bill_total;
     float per_day = inc_minus_bills / 30; /* temp div day (month) */
@@ -68,7 +69,7 @@ int display_main(void) {
     fflush(stdout);
     char ch = single_char_input();
     if (ch == 'y') {
-        add_record();
+        add_record(est_end_of_month, per_day, days_til_month_end);
     }
 
     free(today);
@@ -76,13 +77,19 @@ int display_main(void) {
     return 0;
 }
 
-static int add_record(void) {
+static int add_record(float est_EOM, float per_day, 
+        int days_til_EOM) {
     acct_type_t acct_type = {.acct_Type = recordAcct};
     acct_t *record_head = get_acct_head(acct_type);
     acct_t *curr = record_head;
 
     acct_t *new_record = get_new_acct();
-    strcpy(new_record->name, "new test"); 
+    get_date(new_record);
+    char s_per_day[STR_NUM_LEN];
+    float_to_currency(per_day, s_per_day);
+    sprintf(new_record->name, "PD: %s, %d to EOM", 
+        s_per_day, days_til_EOM); 
+    new_record->balance = est_EOM;
 
     if (curr == NULL) {
         set_acct_head(acct_type, new_record);
