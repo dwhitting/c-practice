@@ -11,6 +11,7 @@ int main() {
         printf("(l) Bills\n");
         printf("(i) Income\n");
         printf("(d) Display\n");
+        printf("(r) Records\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         
@@ -27,6 +28,8 @@ int main() {
             income_menu();
         } else if (ch == 'd') {
             display_main();
+        } else if (ch == 'r') {
+            records_menu();
         }
     }
     

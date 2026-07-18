@@ -4,6 +4,7 @@ static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
+static acct_t *long_term_record_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
@@ -15,52 +16,9 @@ static int update_balance(acct_type_t acct_type, char menu_sel);
 static char *get_acct_type_name(acct_type_t acct_type);
 static int update_cred_date(acct_type_t acct_type);
 static int update_acct_name(acct_type_t acct_type);
-static int print_accts_menu(acct_type_t acct_type) ;
+static int print_accts_menu(acct_type_t acct_type);
+static int update_note(acct_type_t acct_type);
 
-acct_t *get_acct_head(acct_type_t acct_type) {
-    if (acct_type.acct_Type == bnkAcct) {
-        return bnk_accts_ll;
-    } else if (acct_type.acct_Type == credAcct) {
-        return cc_accts_ll;
-    } else if (acct_type.acct_Type == billAcct) {
-        return bill_accts_ll;
-    } else if (acct_type.acct_Type == incomeAcct) {
-        return income_ll;
-    } else {
-        stan_err("acct in get_acct_head not recognized");
-    }
-    return NULL;
-}
-
-int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
-    if (acct_type.acct_Type == bnkAcct) {
-        bnk_accts_ll = input_node;
-    } else if (acct_type.acct_Type == credAcct) {
-        cc_accts_ll = input_node;
-    } else if (acct_type.acct_Type == billAcct) {
-        bill_accts_ll = input_node;
-    } else if (acct_type.acct_Type == incomeAcct) {
-        income_ll = input_node;
-    } else {
-        stan_err("acct type in set_acct_head not recognized");
-    }
-    return 0;
-}
-
-static char *get_acct_type_name(acct_type_t acct_type) {
-    if (acct_type.acct_Type == bnkAcct) {
-        return "Bank Account";
-    } else if (acct_type.acct_Type == credAcct) {
-        return "Credit Account";
-    } else if (acct_type.acct_Type == billAcct) {
-        return "Bill Account";
-    } else if (acct_type.acct_Type == incomeAcct) {
-        return "Income Account";
-    } else {
-        stan_err("acct type in acc_type_name not recognized");
-    }
-    return NULL;
-}
 
 int accts_main(void) {
 
@@ -192,7 +150,7 @@ int bills_menu(void) {
             printf("\nPress key to continue...");
             fflush(stdout);
             single_char_input();
-            print_accts_menu(acct_type);
+            //print_accts_menu(acct_type);
         }
         if (ch == 'm') {
             update_cred_date(acct_type);
@@ -246,7 +204,7 @@ int income_menu(void) {
             printf("\nPress key to continue...");
             fflush(stdout);
             single_char_input();
-            print_accts_menu(acct_type);
+            //print_accts_menu(acct_type);
         }
         if (ch == 'm') {
             update_cred_date(acct_type);
@@ -273,6 +231,133 @@ int income_menu(void) {
     }
 
     return 0;
+}
+
+int records_menu(void) {
+
+acct_type_t acct_type;
+    acct_type.acct_Type = recordAcct;
+
+    while (1) {
+        printf("\nRecords Main Menu:\n");
+        printf("(a) Add Record\n");
+        printf("(l) List Record(s)\n");
+        printf("(u) Update Balance\n");
+        printf("(m) Update month, day, or year\n");
+        printf("(n) Update name\n");
+        printf("(o) Load Record(s)\n");
+        printf("(t) Update note\n");
+        printf("(s) Save Record(s)\n");
+        printf("(d) Delete Record\n");
+
+        printf("(q) Quit Records\n");
+        printf("\nEnter selection: ");
+        char ch = single_char_input();
+        if (ch == 'a') {
+            add_acct(acct_type);
+        }
+        if (ch == 'l') {
+            list_accts(acct_type);
+            printf("\nPress key to continue...");
+            fflush(stdout);
+            single_char_input();
+        }
+        if (ch == 'm') {
+            update_cred_date(acct_type);
+            sort_by_date(acct_type, get_acct_head(acct_type));
+        }
+        if (ch == 'n') {
+            update_acct_name(acct_type);
+        }
+        if (ch == 'o') {
+            load_accts(acct_type);
+        }
+        if (ch == 't') {
+            update_note(acct_type);
+        }
+        if (ch == 's') {
+            save_accts(acct_type);
+        }
+        if (ch == 'u') {
+            update_balance(acct_type, ch);
+        }
+        if (ch == 'd') {
+            delete_acct(acct_type);
+        }
+        if (ch == 'q') {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+static int update_note(acct_type_t acct_type) {
+
+    list_accts(acct_type);
+
+    int ud_line = raw_read_int("Enter line number: ");
+    char new_val_s[NOTE_LEN];
+
+    raw_read_string("\nEnter note: ", new_val_s);
+
+    acct_t *curr = get_acct_head(acct_type);
+    for (int i = 1; i < ud_line; i++) {
+        curr = curr->next_acct;
+    }
+    
+    strcpy(curr->note, new_val_s);    
+
+    return 0;
+}
+
+acct_t *get_acct_head(acct_type_t acct_type) {
+    if (acct_type.acct_Type == bnkAcct) {
+        return bnk_accts_ll;
+    } else if (acct_type.acct_Type == credAcct) {
+        return cc_accts_ll;
+    } else if (acct_type.acct_Type == billAcct) {
+        return bill_accts_ll;
+    } else if (acct_type.acct_Type == incomeAcct) {
+        return income_ll;
+    } else if (acct_type.acct_Type == recordAcct) {
+        return long_term_record_ll;
+    } else {
+        stan_err("acct in get_acct_head not recognized");
+    }
+    return NULL;
+}
+
+int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
+    if (acct_type.acct_Type == bnkAcct) {
+        bnk_accts_ll = input_node;
+    } else if (acct_type.acct_Type == credAcct) {
+        cc_accts_ll = input_node;
+    } else if (acct_type.acct_Type == billAcct) {
+        bill_accts_ll = input_node;
+    } else if (acct_type.acct_Type == incomeAcct) {
+        income_ll = input_node;
+    } else if (acct_type.acct_Type == recordAcct) {
+        long_term_record_ll = input_node;
+    } else {
+        stan_err("acct type in set_acct_head not recognized");
+    }
+    return 0;
+}
+
+static char *get_acct_type_name(acct_type_t acct_type) {
+    if (acct_type.acct_Type == bnkAcct) {
+        return "Bank Account";
+    } else if (acct_type.acct_Type == credAcct) {
+        return "Credit Account";
+    } else if (acct_type.acct_Type == billAcct) {
+        return "Bill Account";
+    } else if (acct_type.acct_Type == incomeAcct) {
+        return "Income Account";
+    } else {
+        stan_err("acct type in acc_type_name not recognized");
+    }
+    return NULL;
 }
 
 static int update_acct_name(acct_type_t acct_type) {
@@ -432,6 +517,10 @@ int num_ll(acct_type_t acct_type) {
     return cnt;
 }
 
+acct_t *get_new_acct(void) {
+    return new_acct();
+}
+
 static acct_t *new_acct(void) {
     acct_t *new_a = (acct_t *)malloc(sizeof(acct_t));
     
@@ -444,6 +533,7 @@ static acct_t *new_acct(void) {
     new_a->cred_remain = 0.0;
     new_a->date_sort = 0;
     new_a->next_acct = NULL;
+    strcpy(new_a->note, "<none>");
     return new_a;
 }
 
@@ -459,6 +549,8 @@ int list_accts(acct_type_t acct_type) {
         curr = bill_accts_ll;
     } else if (acct_type.acct_Type == incomeAcct) {
         curr = income_ll;
+    } else if (acct_type.acct_Type == recordAcct) {
+        curr = long_term_record_ll;
     }
 
     if (curr == NULL) {
@@ -482,6 +574,10 @@ int list_accts(acct_type_t acct_type) {
             char *mon = month_to_str(curr->month);
             printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
                 curr->balance);      
+        } else if (acct_type.acct_Type == recordAcct) {
+            char *mon = month_to_str(curr->month);
+            printf("<%2d> %2d %s %4d %-30s bal: $%.2f Note: %s\n",idx++, curr->day, mon, curr->year, curr->name, 
+                curr->balance, curr->note);                
         }
         
         curr = curr->next_acct;
@@ -535,6 +631,8 @@ static int add_acct(acct_type_t acct_type) {
             bill_accts_ll = head;
         } else if (acct_type.acct_Type == incomeAcct) {
             income_ll = head;
+        } else if (acct_type.acct_Type == recordAcct) {
+            long_term_record_ll = head;
         }
         
     }
@@ -555,6 +653,8 @@ static int save_accts(acct_type_t acct_type) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
         strcpy(file, "income_data");
+    } else if (acct_type.acct_Type == recordAcct) {
+        strcpy(file, "record_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
@@ -577,6 +677,7 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->year, sizeof(int));
         write(fd, &curr->date_sort, sizeof(int));
         write(fd, &curr->cred_remain, sizeof(float));
+        write(fd, &curr->note, NOTE_LEN);
     
         curr->next_acct = temp_save;
         curr = curr->next_acct;
@@ -602,6 +703,9 @@ int load_all_accts(void) {
     acct_type.acct_Type = incomeAcct;
     load_accts(acct_type);
 
+    acct_type.acct_Type = recordAcct;
+    load_accts(acct_type);
+
     return 0;
 }
 
@@ -618,6 +722,8 @@ int load_accts(acct_type_t acct_type) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
         strcpy(file, "income_data");
+    } else if (acct_type.acct_Type == recordAcct) {
+        strcpy(file, "record_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
@@ -631,7 +737,6 @@ int load_accts(acct_type_t acct_type) {
             stan_err("open file data failed");
             return -1;
         }
-        
     }
 
     free_accts(acct_type);
@@ -663,6 +768,7 @@ int load_accts(acct_type_t acct_type) {
         read(fd, &node_read->year, sizeof(int));
         read(fd, &node_read->date_sort, sizeof(int));
         read(fd, &node_read->cred_remain, sizeof(float));
+        read(fd, &node_read->note, NOTE_LEN);
 
         node_read->next_acct = NULL;
 
@@ -703,10 +809,12 @@ int accts_exit(void) {
     acct_type_t cred = {.acct_Type = credAcct};
     acct_type_t bills = {.acct_Type = billAcct};
     acct_type_t income = {.acct_Type = incomeAcct};
+    acct_type_t record = {.acct_Type = recordAcct};
     free_accts(bnk);
     free_accts(cred);
     free_accts(bills);
     free_accts(income);
+    free_accts(record);
 
     return 0;
 }

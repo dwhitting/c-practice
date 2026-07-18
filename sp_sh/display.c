@@ -4,6 +4,7 @@ static int list_bank_accts(float *bank_total);
 static int list_cc_accts(float *cc_used_total);
 static int list_income(float *income_total);
 static int list_bills(float *end_of_month, float accts_combined_val);
+static int add_record(void);
 
 int display_main(void) {
 
@@ -63,11 +64,36 @@ int display_main(void) {
     printf("%d %s %d Final End of Month: %s\n",today->day, s_curr_mon, 
         today->year, s_total);
 
-    printf("\nPress key to continue...");
+    printf("\nAdd Record? (y)...");
     fflush(stdout);
-    single_char_input();
+    char ch = single_char_input();
+    if (ch == 'y') {
+        add_record();
+    }
 
     free(today);
+
+    return 0;
+}
+
+static int add_record(void) {
+    acct_type_t acct_type = {.acct_Type = recordAcct};
+    acct_t *record_head = get_acct_head(acct_type);
+    acct_t *curr = record_head;
+
+    acct_t *new_record = get_new_acct();
+    strcpy(new_record->name, "new test"); 
+
+    if (curr == NULL) {
+        set_acct_head(acct_type, new_record);
+        return 0;
+    }
+
+    while (curr->next_acct != NULL) {
+        curr = curr->next_acct;
+    }
+
+    curr->next_acct = new_record;
 
     return 0;
 }

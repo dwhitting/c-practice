@@ -15,13 +15,15 @@
 
 #define ACCT_NAME_LEN 100
 #define STR_NUM_LEN 20
+#define NOTE_LEN 500
 #define DOC_PATH "/media/psf/Documents"
 
 typedef enum {
     bnkAcct,
     credAcct,
     billAcct,
-    incomeAcct
+    incomeAcct,
+    recordAcct
 } AcctType;
 
 typedef enum {
@@ -41,6 +43,7 @@ typedef struct _acct_t {
     float cred_lim;
     float cred_remain;
     int date_sort;
+    char note[NOTE_LEN];
     struct _acct_t *next_acct;
 } acct_t;
 
@@ -70,5 +73,7 @@ float total_bills(void);
 int load_all_accts(void);
 int income_menu(void);
 int last_day_curr_month(void);
+int records_menu(void);
+acct_t *get_new_acct(void);
 
 #endif
