@@ -460,8 +460,10 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         curr->balance = new_bal_f;
     } else if (menu_sel == 'i') {
         curr->cred_lim = new_bal_f;
+        curr->balance = curr->cred_lim - curr->cred_remain;
     } else if (menu_sel == 'r') {
         curr->cred_remain = new_bal_f;
+        curr->balance = curr->cred_lim - curr->cred_remain;
     }
 
     printf("\nAcct updated\n");
@@ -566,6 +568,7 @@ int list_accts(acct_type_t acct_type) {
         if (acct_type.acct_Type == bnkAcct) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
         } else if (acct_type.acct_Type == credAcct) {
+            curr->balance = curr->cred_lim - curr->cred_remain;
             printf("<%d> %-14s bal: $%.2f (remain: $%.2f)  <lim: $%.2f>\n",idx++, curr->name, 
                 (curr->cred_lim - curr->cred_remain), curr->cred_remain, curr->cred_lim);
         } else if (acct_type.acct_Type == billAcct) {
@@ -590,6 +593,13 @@ int list_accts(acct_type_t acct_type) {
         char s_total[STR_NUM_LEN];
         float_to_currency(total, s_total);
         printf("\nTotal Bills: %s\n", s_total);
+    }
+
+    if (acct_type.acct_Type == credAcct) {
+        float total = total_acct_balance(acct_type);
+        char s_total[STR_NUM_LEN];
+        float_to_currency(total, s_total);
+        printf("\nTotal Bal: %s\n", s_total);
     }
 
     if (acct_type.acct_Type == recordAcct) {
