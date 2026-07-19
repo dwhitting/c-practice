@@ -18,6 +18,7 @@ static int update_cred_date(acct_type_t acct_type);
 static int update_acct_name(acct_type_t acct_type);
 static int print_accts_menu(acct_type_t acct_type);
 static int update_note(acct_type_t acct_type);
+static float total_day_change(acct_type_t acct_type);
 
 
 int accts_main(void) {
@@ -592,7 +593,7 @@ int list_accts(acct_type_t acct_type) {
     }
 
     if (acct_type.acct_Type == recordAcct) {
-        float total = total_acct_balance(acct_type);
+        float total = total_day_change(acct_type);
         char s_total[STR_NUM_LEN];
         float_to_currency(total, s_total);
         printf("\nTotal change: %s\n", s_total);        
@@ -860,4 +861,17 @@ int update_day_change(void) {
     }
 
     return 0;
+}
+
+static float total_day_change(acct_type_t acct_type) {
+
+    acct_t *curr = get_acct_head(acct_type);
+    float sum = 0.0;
+
+    while (curr != NULL) {
+        sum += curr->cred_remain;
+        curr = curr->next_acct;
+    }
+    
+    return sum;
 }
