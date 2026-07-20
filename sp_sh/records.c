@@ -1,7 +1,7 @@
 #include "stan_hdr.h"
 
 typedef struct _record_t {
-    float end_of_month;
+    float actual_end_of_month;
     float EOM_minus_per_days;
     float day_change;
     int days_til_EOM;
@@ -25,6 +25,8 @@ static int update_note(void);
 static int sort_reccs_by_date(void);
 static int delete_record(void);
 static int num_records(void);
+static int select_record_line(void);
+static int update_current_EOM(void);
 //static int transfer_recs(void);
 
 int records_menu(void) {
@@ -33,9 +35,8 @@ int records_menu(void) {
         printf("\nRecords Main Menu:\n");
         //printf("(a) Add Record\n");
         printf("(l) List Record(s)\n");
-        printf("(u) Update Final EOM\n");
+        printf("(u) Update Current EOM\n");
         printf("(m) Update Month, Day, or Year\n");
-        printf("(n) Update Main Text\n");
         printf("(o) Load Record(s)\n");
         printf("(t) Update Note\n");
         printf("(s) Save Record(s)\n");
@@ -56,10 +57,6 @@ int records_menu(void) {
         // if (ch == 'm') {
         //     update_cred_date(acct_type);
         //     sort_by_date(acct_type, get_acct_head(acct_type));
-        // }
-        // if (ch == 'n') {
-        //     update_acct_name(acct_type);
-        // }
         if (ch == 'o') {
             load_records();
         }
@@ -69,9 +66,9 @@ int records_menu(void) {
         if (ch == 's') {
             save_records();
         }
-        // if (ch == 'u') {
-        //     update_balance(acct_type, ch);
-        // }
+        if (ch == 'u') {
+            update_current_EOM();
+        }
         if (ch == 'd') {
             delete_record();
         }
@@ -83,8 +80,29 @@ int records_menu(void) {
     return 0;
 }
 
+static int update_current_EOM(void) {
+
+    int sel_line = select_record_line();
+    
+    if (sel_line == 0) {
+        return 0;
+    }
+
+    record_t *curr = long_term_record_ll_new;
+    for (int i = 1; i < sel_line; i++) {
+        curr = curr->next_rec;
+    }
+
+    int new_bal_i = raw_read_int("\nEnter new value: ");
+    curr->actual_end_of_month = new_bal_i;
+
+    printf("Value updated\n");
+
+    return 0;
+}
+
 int add_record(float est_EOM, float per_day, 
-        int days_til_EOM) {
+        int days_til_EOM, float actual_end_of_month) {
     record_t *record_head = long_term_record_ll_new;
     record_t *curr = record_head;
     record_t *new_record = calloc(1, sizeof(record_t));
@@ -96,7 +114,8 @@ int add_record(float est_EOM, float per_day,
     acct_t *acct_record = get_new_acct();
     get_date(acct_record);
 
-    new_record->end_of_month = est_EOM;
+    new_record->EOM_minus_per_days = est_EOM;
+    new_record->actual_end_of_month = actual_end_of_month;
     new_record->per_day = per_day;
     new_record->days_til_EOM = days_til_EOM;
     new_record->day = acct_record->day;
@@ -119,21 +138,28 @@ int add_record(float est_EOM, float per_day,
     return 0;
 }
 
-static int delete_record(void) {
-    
+static int select_record_line(void) {
+
     int total_nodes = num_records();
     if (total_nodes == 0) {
-        printf("\nNo accts to remove\n");
+        printf("\nNo records to select\n");
         return 0;
     }
 
     list_records();
-    int rem_line = raw_read_int("Enter number to remove: ");
+    int sel_line = raw_read_int("Enter number to remove: ");
 
-    if (rem_line < 1 || rem_line > total_nodes) {
+    if (sel_line < 1 || sel_line > total_nodes) {
         printf("\nSelection out of range\n");
         return 0;
     }
+
+    return sel_line;
+}
+
+static int delete_record(void) {
+    
+    int rem_line = select_record_line();
 
     if (rem_line == 1) {
         record_t *head = long_term_record_ll_new;
@@ -184,8 +210,8 @@ static int list_records(void) {
 
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
-        printf("<%2d> %2d %s %4d EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
-            curr->end_of_month, curr->day_change, curr->note); 
+        printf("<%2d> %2d %s %4d AC: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
+            curr->actual_end_of_month, curr->EOM_minus_per_days, curr->day_change, curr->note); 
         
         curr = curr->next_rec;
     }       
@@ -211,9 +237,9 @@ static int update_day_change(void) {
     float prev_bal = 0.0;
     curr->day_change = 0.0;
     while (curr->next_rec != NULL) {
-        prev_bal = curr->end_of_month;
+        prev_bal = curr->EOM_minus_per_days;
         curr = curr->next_rec;
-        curr->day_change = curr->end_of_month - prev_bal;
+        curr->day_change = curr->EOM_minus_per_days - prev_bal;
     }
 
     return 0;
@@ -302,7 +328,7 @@ int load_records(void) {
 
         }
 
-        bytes_read = read(fd, &node_read->end_of_month, sizeof(float));
+        bytes_read = read(fd, &node_read->actual_end_of_month, sizeof(float));
         if (bytes_read < 0) {
             printf("read error: %s\n", strerror(errno));
             free(node_read);
@@ -357,9 +383,9 @@ int free_records(void) {
     return 0;
 }
 
-
-
 static int save_records(void) {
+
+    sort_reccs_by_date();
     
     int fd;
     char full_path[200];     /* since file is 100 */
@@ -378,7 +404,7 @@ static int save_records(void) {
         record_t *temp_save = curr->next_rec;
         curr->next_rec = NULL;
 
-        write(fd, &curr->end_of_month, sizeof(float));
+        write(fd, &curr->actual_end_of_month, sizeof(float));
         write(fd, &curr->EOM_minus_per_days, sizeof(float));
         write(fd, &curr->days_til_EOM, sizeof(int));
         write(fd, &curr->per_day, sizeof(float));

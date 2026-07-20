@@ -142,6 +142,7 @@ int bills_menu(void) {
         char ch = single_char_input();
         if (ch == 'a') {
             add_acct(acct_type);
+            sort_by_date(acct_type, get_acct_head(acct_type));
         }
         if (ch == 'l') {
             list_accts(acct_type);

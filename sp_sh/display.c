@@ -7,6 +7,8 @@ static int list_bills(float *end_of_month, float accts_combined_val);
 
 int display_main(void) {
 
+    float est_ret_pay = 5500.0 + 2000.0; // monthly plus VA w/ 2.1k taken out for M
+
     char temp_curr_1[STR_NUM_LEN];   /* used to store all floats converted to string currency */
     int month_last_day = last_day_curr_month();
 
@@ -25,25 +27,34 @@ int display_main(void) {
     /* list income */
     float income_total = 0.0;
     list_income(&income_total);
+    printf("        Retired per m: $%.2f\n", est_ret_pay);          //RET only
 
     acct_type_t bills_acct_type = {.acct_Type = billAcct};
     float bill_total = total_acct_balance(bills_acct_type);
     char s_total[STR_NUM_LEN];
+    int days_in_curr_month = last_day_curr_month();
     float inc_minus_bills = income_total - bill_total;
-    float per_day = inc_minus_bills / 30; /* temp div day (month) */
+    float per_day = inc_minus_bills / days_in_curr_month;
+    float ret_inc_minus_bills = est_ret_pay - bill_total;           //RET only
+    float ret_per_day = ret_inc_minus_bills / days_in_curr_month;   //RET only
 
     /* list bills */
-    float end_of_month = 0;
-    list_bills(&end_of_month, accts_combined_val);
+    float income_minus_bills = 0;
+    list_bills(&income_minus_bills, accts_combined_val);
 
     float_to_currency(bill_total, s_total);
     printf("\nTotal Bills: %s\n", s_total);
 
     float_to_currency(inc_minus_bills, s_total);
     printf("\nIncome - Bills: %s\n", s_total);
+    float_to_currency(ret_inc_minus_bills, s_total);                //RET only
+    printf("RET Income - Bills: %s\n", s_total);                    //RET only
     
     float_to_currency(per_day, s_total);
     printf("Per Day: %s\n", s_total);
+    float_to_currency(ret_per_day, s_total);                        //RET only
+    printf("RET Per Day: %s\n", s_total);                           //RET only
+
 
     acct_t *today = malloc(sizeof(acct_t));
     get_date(today);
@@ -54,21 +65,35 @@ int display_main(void) {
     float total_daily_adjust = days_til_month_end * per_day;
     char s_total_daily_adjust[STR_NUM_LEN] = "";
     float_to_currency(total_daily_adjust, s_total_daily_adjust);
+    float ret_total_daily_adjust = days_til_month_end * ret_per_day;   //RET only
+    char s_ret_total_daily_adjust[STR_NUM_LEN] = "";                //RET only
+    float_to_currency(ret_total_daily_adjust, s_ret_total_daily_adjust); //RET only
 
-    float_to_currency(end_of_month, s_total);
+    float_to_currency(income_minus_bills, s_total);
     printf("\nPre-end of month: %s (-%s)(%d(s)) (Date: %d %s)\n", 
         s_total, s_total_daily_adjust, days_til_month_end, 
         month_last_day, s_curr_mon);
-    float est_end_of_month = end_of_month - total_daily_adjust;
+    float est_end_of_month = income_minus_bills - total_daily_adjust;
     float_to_currency(est_end_of_month, s_total);
     printf("%d %s %d Final End of Month: %s\n",today->day, s_curr_mon, 
         today->year, s_total);
+
+    /* for RET only */
+    float_to_currency(income_minus_bills, s_total);
+    printf("\nRET Pre-end of month: %s (-%s)(%d(s)) (Date: %d %s)\n", 
+        s_total, s_ret_total_daily_adjust, days_til_month_end, 
+        month_last_day, s_curr_mon);
+    float ret_est_end_of_month = income_minus_bills - ret_total_daily_adjust;
+    float_to_currency(ret_est_end_of_month, s_total);
+    printf("%d %s %d RET Final End of Month: %s\n",today->day, s_curr_mon, 
+        today->year, s_total);
+    /* ======= END ============== */
 
     printf("\nAdd Record? (y)...");
     fflush(stdout);
     char ch = single_char_input();
     if (ch == 'y') {
-        add_record(est_end_of_month, per_day, days_til_month_end);
+        add_record(est_end_of_month, per_day, days_til_month_end, income_minus_bills);
     }
 
     free(today);
