@@ -43,7 +43,6 @@ typedef struct _acct_t {
     float cred_lim;
     float cred_remain;
     int date_sort;
-    char note[NOTE_LEN];
     struct _acct_t *next_acct;
 } acct_t;
 
@@ -75,6 +74,8 @@ int income_menu(void);
 int last_day_curr_month(void);
 int records_menu(void);
 acct_t *get_new_acct(void);
-int update_day_change(void);
+int free_records(void);
+int load_records(void);
+int add_record(float est_EOM, float per_day, int days_til_EOM);
 
 #endif

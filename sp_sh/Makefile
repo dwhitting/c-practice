@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -pthread 
 DEPS = stan_hdr.h 
-OBJS = main.o stan_hdr.o accts.o display.o
+OBJS = main.o stan_hdr.o accts.o display.o records.o
 TARGET = main
 
 # Default rule to build the program

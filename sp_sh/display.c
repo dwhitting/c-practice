@@ -4,7 +4,6 @@ static int list_bank_accts(float *bank_total);
 static int list_cc_accts(float *cc_used_total);
 static int list_income(float *income_total);
 static int list_bills(float *end_of_month, float accts_combined_val);
-static int add_record(float est_EOM, float per_day, int days_til_EOM);
 
 int display_main(void) {
 
@@ -73,34 +72,6 @@ int display_main(void) {
     }
 
     free(today);
-
-    return 0;
-}
-
-static int add_record(float est_EOM, float per_day, 
-        int days_til_EOM) {
-    acct_type_t acct_type = {.acct_Type = recordAcct};
-    acct_t *record_head = get_acct_head(acct_type);
-    acct_t *curr = record_head;
-
-    acct_t *new_record = get_new_acct();
-    get_date(new_record);
-    char s_per_day[STR_NUM_LEN];
-    float_to_currency(per_day, s_per_day);
-    sprintf(new_record->name, "PD: %s, %d to EOM", 
-        s_per_day, days_til_EOM); 
-    new_record->balance = est_EOM;
-
-    if (curr == NULL) {
-        set_acct_head(acct_type, new_record);
-        return 0;
-    }
-
-    while (curr->next_acct != NULL) {
-        curr = curr->next_acct;
-    }
-
-    curr->next_acct = new_record;
 
     return 0;
 }
