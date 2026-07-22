@@ -1,8 +1,8 @@
 #include "stan_hdr.h"
 
 typedef struct _record_t {
-    float actual_end_of_month;
-    float EOM_minus_per_days;
+    float income_minus_bills;
+    float EOM_assets_minus_per_days;
     float day_change;
     int days_til_EOM;
     float per_day;
@@ -94,15 +94,15 @@ static int update_current_EOM(void) {
     }
 
     int new_bal_i = raw_read_int("\nEnter new value: ");
-    curr->actual_end_of_month = new_bal_i;
+    curr->income_minus_bills = new_bal_i;
 
     printf("Value updated\n");
 
     return 0;
 }
 
-int add_record(float est_EOM, float per_day, 
-        int days_til_EOM, float actual_end_of_month) {
+int add_record(float EOM_assets_minus_bills, float per_day, 
+        int days_til_EOM, float income_minus_bills) {
     record_t *record_head = long_term_record_ll_new;
     record_t *curr = record_head;
     record_t *new_record = calloc(1, sizeof(record_t));
@@ -114,8 +114,8 @@ int add_record(float est_EOM, float per_day,
     acct_t *acct_record = get_new_acct();
     get_date(acct_record);
 
-    new_record->EOM_minus_per_days = est_EOM;
-    new_record->actual_end_of_month = actual_end_of_month;
+    new_record->EOM_assets_minus_per_days = EOM_assets_minus_bills;
+    new_record->income_minus_bills = income_minus_bills;
     new_record->per_day = per_day;
     new_record->days_til_EOM = days_til_EOM;
     new_record->day = acct_record->day;
@@ -210,8 +210,8 @@ static int list_records(void) {
 
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
-        printf("<%2d> %2d %s %4d AC: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
-            curr->actual_end_of_month, curr->EOM_minus_per_days, curr->day_change, curr->note); 
+        printf("<%2d> %2d %s %4d Inc-Bills: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
+            curr->income_minus_bills, curr->EOM_assets_minus_per_days, curr->day_change, curr->note); 
         
         curr = curr->next_rec;
     }       
@@ -237,9 +237,9 @@ static int update_day_change(void) {
     float prev_bal = 0.0;
     curr->day_change = 0.0;
     while (curr->next_rec != NULL) {
-        prev_bal = curr->EOM_minus_per_days;
+        prev_bal = curr->EOM_assets_minus_per_days;
         curr = curr->next_rec;
-        curr->day_change = curr->EOM_minus_per_days - prev_bal;
+        curr->day_change = curr->EOM_assets_minus_per_days - prev_bal;
     }
 
     return 0;
@@ -328,7 +328,7 @@ int load_records(void) {
 
         }
 
-        bytes_read = read(fd, &node_read->actual_end_of_month, sizeof(float));
+        bytes_read = read(fd, &node_read->income_minus_bills, sizeof(float));
         if (bytes_read < 0) {
             printf("read error: %s\n", strerror(errno));
             free(node_read);
@@ -339,7 +339,7 @@ int load_records(void) {
             break;
         }
 
-        read(fd, &node_read->EOM_minus_per_days, sizeof(float));
+        read(fd, &node_read->EOM_assets_minus_per_days, sizeof(float));
         read(fd, &node_read->days_til_EOM, sizeof(int));
         read(fd, &node_read->per_day, sizeof(float));
         read(fd, &node_read->day, sizeof(int));
@@ -404,8 +404,8 @@ static int save_records(void) {
         record_t *temp_save = curr->next_rec;
         curr->next_rec = NULL;
 
-        write(fd, &curr->actual_end_of_month, sizeof(float));
-        write(fd, &curr->EOM_minus_per_days, sizeof(float));
+        write(fd, &curr->income_minus_bills, sizeof(float));
+        write(fd, &curr->EOM_assets_minus_per_days, sizeof(float));
         write(fd, &curr->days_til_EOM, sizeof(int));
         write(fd, &curr->per_day, sizeof(float));
         write(fd, &curr->day, sizeof(int));
@@ -442,55 +442,3 @@ static int update_note(void) {
 
     return 0;
 }
-
-// static int transfer_recs(void) {
-
-//     acct_type_t old_acct = {.acct_Type = recordAcct};
-//     acct_t *curr_old = get_acct_head(old_acct);
-//     record_t *curr_new = NULL;
-//     record_t *written = NULL;
-//     record_t *written_head = NULL;
-
-//     while (curr_old != NULL) {
-//         curr_new = malloc(sizeof(record_t));
-//         if (written == NULL) {
-//             curr_new->date_sort = curr_old->date_sort;
-//             curr_new->day = curr_old->day;
-//             curr_new->day_change = curr_old->cred_remain;
-//             curr_new->days_til_EOM = 0;
-//             curr_new->end_of_month = curr_old->balance;
-//             curr_new->EOM_minus_per_days = 0;
-//             curr_new->month = curr_old->month;
-//             strcpy(curr_new->note, curr_old->note);
-//             curr_new->per_day = 0;
-//             curr_new->year = curr_old->year;
-
-//             written = curr_new;
-//             written_head = written;
-
-//         } else {
-//             curr_new->date_sort = curr_old->date_sort;
-//             curr_new->day = curr_old->day;
-//             curr_new->day_change = curr_old->cred_remain;
-//             curr_new->days_til_EOM = 0;
-//             curr_new->end_of_month = curr_old->balance;
-//             curr_new->EOM_minus_per_days = 0;
-//             curr_new->month = curr_old->month;
-//             strcpy(curr_new->note, curr_old->note);
-//             curr_new->per_day = 0;
-//             curr_new->year = curr_old->year;
-
-//             written->next_rec = curr_new;
-//             written = written->next_rec;
-//         }
-
-//         curr_old = curr_old->next_acct;
-//     }
-
-//     long_term_record_ll_new = written_head;
-//     save_records();
-
-//     printf("COMPETE\n");
-
-//     return 0;
-// }

@@ -76,6 +76,6 @@ int records_menu(void);
 acct_t *get_new_acct(void);
 int free_records(void);
 int load_records(void);
-int add_record(float est_EOM, float per_day, int days_til_EOM, float end_of_month);
+int add_record(float EOM_assets_minus_bills, float per_day, int days_til_EOM, float end_of_month);
 
 #endif
