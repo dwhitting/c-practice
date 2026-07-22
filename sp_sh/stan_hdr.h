@@ -46,6 +46,28 @@ typedef struct _acct_t {
     struct _acct_t *next_acct;
 } acct_t;
 
+typedef struct _record_t {
+    int day;
+    Month month;
+    int year;
+    int date_sort;
+    int days_in_month;
+    int days_till_EOM;
+    float assets_total;
+    float cc_used_total;
+    float income_total;
+    float RET_income_total;
+    float bills_total;
+    float per_day;
+    float RET_per_day;
+    float EOM_assets_minus_bills;
+    float day_change;
+
+    char note[NOTE_LEN];
+    struct _record_t *next_rec;
+
+} record_t;
+
 int stan_err(char * in_str);
 char single_char_input(void);
 
@@ -76,6 +98,6 @@ int records_menu(void);
 acct_t *get_new_acct(void);
 int free_records(void);
 int load_records(void);
-int add_record(float EOM_assets_minus_bills, float per_day, int days_til_EOM, float end_of_month);
+int add_record(record_t *new_record);
 
 #endif

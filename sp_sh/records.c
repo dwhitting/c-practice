@@ -1,22 +1,6 @@
 #include "stan_hdr.h"
 
-typedef struct _record_t {
-    float income_minus_bills;
-    float EOM_assets_minus_per_days;
-    float day_change;
-    int days_til_EOM;
-    float per_day;
-    int day;
-    Month month;
-    int year;
-    int date_sort;
-
-    char note[NOTE_LEN];
-    struct _record_t *next_rec;
-
-} record_t;
-
-static record_t *long_term_record_ll_new = NULL;
+static record_t *long_term_record_ll = NULL;
 static int save_records(void);
 static int update_day_change(void);
 static int list_records(void);
@@ -80,52 +64,15 @@ int records_menu(void) {
     return 0;
 }
 
-static int update_current_EOM(void) {
-
-    int sel_line = select_record_line();
-    
-    if (sel_line == 0) {
-        return 0;
-    }
-
-    record_t *curr = long_term_record_ll_new;
-    for (int i = 1; i < sel_line; i++) {
-        curr = curr->next_rec;
-    }
-
-    int new_bal_i = raw_read_int("\nEnter new value: ");
-    curr->income_minus_bills = new_bal_i;
-
-    printf("Value updated\n");
-
-    return 0;
-}
-
-int add_record(float EOM_assets_minus_bills, float per_day, 
-        int days_til_EOM, float income_minus_bills) {
-    record_t *record_head = long_term_record_ll_new;
+int add_record(record_t *new_record) {
+    record_t *record_head = long_term_record_ll;
     record_t *curr = record_head;
-    record_t *new_record = calloc(1, sizeof(record_t));
-    if (new_record == NULL) {
-        printf("calloc failed in add record\n");
-        return 1;
-    }
 
-    acct_t *acct_record = get_new_acct();
-    get_date(acct_record);
-
-    new_record->EOM_assets_minus_per_days = EOM_assets_minus_bills;
-    new_record->income_minus_bills = income_minus_bills;
-    new_record->per_day = per_day;
-    new_record->days_til_EOM = days_til_EOM;
-    new_record->day = acct_record->day;
-    new_record->month = acct_record->month;
-    new_record->year = acct_record->year;
-    new_record->date_sort = acct_record->date_sort;
+    printf("in add rec: %d\n", new_record->date_sort);
     strcpy(new_record->note, "<new rec added>");
 
     if (curr == NULL) {
-        long_term_record_ll_new = new_record;
+        long_term_record_ll = new_record;
         return 0;
     }
 
@@ -134,6 +81,27 @@ int add_record(float EOM_assets_minus_bills, float per_day,
     }
 
     curr->next_rec = new_record;
+
+    return 0;
+}
+
+static int update_current_EOM(void) {
+
+    int sel_line = select_record_line();
+    
+    if (sel_line == 0) {
+        return 0;
+    }
+
+    record_t *curr = long_term_record_ll;
+    for (int i = 1; i < sel_line; i++) {
+        curr = curr->next_rec;
+    }
+
+    int new_bal_i = raw_read_int("\nEnter new value: ");
+    //curr->income_minus_bills = new_bal_i;
+
+    printf("Value updated\n");
 
     return 0;
 }
@@ -158,19 +126,30 @@ static int select_record_line(void) {
 }
 
 static int delete_record(void) {
+
+    int total_nodes = num_records();
+    if (total_nodes == 0) {
+        printf("\nNo accts to remove\n");
+        return 0;
+    }
     
     int rem_line = select_record_line();
 
+    if (rem_line < 1 || rem_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
     if (rem_line == 1) {
-        record_t *head = long_term_record_ll_new;
-        head = head->next_rec;
-        free(head);
+        record_t *old_head = long_term_record_ll;
+        long_term_record_ll = old_head->next_rec;        
+        free(old_head);
         printf("\nRemoved first acct\n");
         return 0;
     } 
     
     record_t *prev = NULL;
-    record_t *curr = long_term_record_ll_new;
+    record_t *curr = long_term_record_ll;
 
     for (int i = 1; i < rem_line; i++) {
         prev = curr;
@@ -186,7 +165,7 @@ static int delete_record(void) {
 
 static int num_records(void) {
     int cnt = 0;
-    record_t *curr = long_term_record_ll_new;
+    record_t *curr = long_term_record_ll;
     while (curr != NULL) {
         cnt++;
         curr = curr->next_rec;
@@ -199,7 +178,7 @@ static int list_records(void) {
     update_day_change();
     sort_reccs_by_date();
 
-    record_t *curr = long_term_record_ll_new;
+    record_t *curr = long_term_record_ll;
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
@@ -210,8 +189,8 @@ static int list_records(void) {
 
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
-        printf("<%2d> %2d %s %4d Inc-Bills: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
-            curr->income_minus_bills, curr->EOM_assets_minus_per_days, curr->day_change, curr->note); 
+        printf("<%2d> %2d %s %4d Assets-Bills: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
+            (curr->assets_total - curr->bills_total), curr->EOM_assets_minus_bills, curr->day_change, curr->note); 
         
         curr = curr->next_rec;
     }       
@@ -226,7 +205,7 @@ static int list_records(void) {
 
 static int update_day_change(void) {
     record_t *records_head;
-    records_head = long_term_record_ll_new;
+    records_head = long_term_record_ll;
     record_t *curr = records_head;
 
     if (records_head == NULL) {
@@ -235,11 +214,11 @@ static int update_day_change(void) {
     }
 
     float prev_bal = 0.0;
-    curr->day_change = 0.0;
+    curr->per_day = 0.0;
     while (curr->next_rec != NULL) {
-        prev_bal = curr->EOM_assets_minus_per_days;
+        prev_bal = curr->EOM_assets_minus_bills - (curr->per_day * curr->days_till_EOM);
         curr = curr->next_rec;
-        curr->day_change = curr->EOM_assets_minus_per_days - prev_bal;
+        curr->day_change = (curr->EOM_assets_minus_bills - (curr->per_day * curr->days_till_EOM)) - prev_bal;
     }
 
     return 0;
@@ -247,7 +226,7 @@ static int update_day_change(void) {
 
 static int sort_reccs_by_date(void) {
 
-    record_t *input_head = long_term_record_ll_new;
+    record_t *input_head = long_term_record_ll;
 
     /* zero or 1 elements already sorted */
     if (input_head == NULL || input_head->next_rec == NULL) {
@@ -278,18 +257,18 @@ static int sort_reccs_by_date(void) {
         curr = next_node;
     }
 
-    long_term_record_ll_new = dummy.next_rec;
+    long_term_record_ll = dummy.next_rec;
 
     return 0;
 }
 
 static float total_day_change(void) {
 
-    record_t*curr = long_term_record_ll_new;
+    record_t*curr = long_term_record_ll;
     float sum = 0.0;
 
     while (curr != NULL) {
-        sum += curr->day_change;
+        sum += curr->per_day;
         curr = curr->next_rec;
     }
     
@@ -301,7 +280,7 @@ int load_records(void) {
     int fd;
     char full_path[200];   /* since file is 100 */
     char file[ACCT_NAME_LEN];
-    strcpy(file, "record_data_new");
+    strcpy(file, "record_data");
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_RDONLY);
@@ -328,7 +307,7 @@ int load_records(void) {
 
         }
 
-        bytes_read = read(fd, &node_read->income_minus_bills, sizeof(float));
+        bytes_read = read(fd, &node_read->day, sizeof(int));
         if (bytes_read < 0) {
             printf("read error: %s\n", strerror(errno));
             free(node_read);
@@ -339,13 +318,20 @@ int load_records(void) {
             break;
         }
 
-        read(fd, &node_read->EOM_assets_minus_per_days, sizeof(float));
-        read(fd, &node_read->days_til_EOM, sizeof(int));
-        read(fd, &node_read->per_day, sizeof(float));
-        read(fd, &node_read->day, sizeof(int));
-        read(fd, &node_read->month, sizeof(Month));
+        read(fd, &node_read->month, sizeof(int));
         read(fd, &node_read->year, sizeof(int));
         read(fd, &node_read->date_sort, sizeof(int));
+        read(fd, &node_read->days_in_month, sizeof(int));
+        read(fd, &node_read->days_till_EOM, sizeof(int));
+        read(fd, &node_read->assets_total, sizeof(float));
+        read(fd, &node_read->cc_used_total, sizeof(float));
+        read(fd, &node_read->income_total, sizeof(float));
+        read(fd, &node_read->RET_income_total, sizeof(float));
+        read(fd, &node_read->bills_total, sizeof(float));
+        read(fd, &node_read->per_day, sizeof(float));
+        read(fd, &node_read->RET_per_day, sizeof(float));
+        read(fd, &node_read->EOM_assets_minus_bills, sizeof(float));
+        read(fd, &node_read->day_change, sizeof(float));
 
         read(fd, &node_read->note, NOTE_LEN);
 
@@ -362,14 +348,14 @@ int load_records(void) {
     }
 
     close(fd);
-    long_term_record_ll_new = head;
+    long_term_record_ll = head;
     
     return 0;
 
 }
 
 int free_records(void) {
-    record_t *head = long_term_record_ll_new;
+    record_t *head = long_term_record_ll;
     record_t *curr = head;
     record_t *next = NULL;
 
@@ -379,7 +365,7 @@ int free_records(void) {
         curr = next;
     }
     
-    long_term_record_ll_new = NULL;
+    long_term_record_ll = NULL;
     return 0;
 }
 
@@ -390,7 +376,7 @@ static int save_records(void) {
     int fd;
     char full_path[200];     /* since file is 100 */
     char file[ACCT_NAME_LEN];
-    strcpy(file, "record_data_new");
+    strcpy(file, "record_data");
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -399,19 +385,26 @@ static int save_records(void) {
         stan_err("open file to save data failed");
     }
 
-    record_t *curr = long_term_record_ll_new;
+    record_t *curr = long_term_record_ll;
     while (curr != NULL) {
         record_t *temp_save = curr->next_rec;
         curr->next_rec = NULL;
 
-        write(fd, &curr->income_minus_bills, sizeof(float));
-        write(fd, &curr->EOM_assets_minus_per_days, sizeof(float));
-        write(fd, &curr->days_til_EOM, sizeof(int));
-        write(fd, &curr->per_day, sizeof(float));
         write(fd, &curr->day, sizeof(int));
         write(fd, &curr->month, sizeof(Month));
         write(fd, &curr->year, sizeof(int));
         write(fd, &curr->date_sort, sizeof(int));
+        write(fd, &curr->days_in_month, sizeof(int));
+        write(fd, &curr->days_till_EOM, sizeof(int));
+        write(fd, &curr->assets_total, sizeof(float));
+        write(fd, &curr->cc_used_total, sizeof(float));
+        write(fd, &curr->income_total, sizeof(float));
+        write(fd, &curr->RET_income_total, sizeof(float));
+        write(fd, &curr->bills_total, sizeof(float));
+        write(fd, &curr->per_day, sizeof(float));
+        write(fd, &curr->RET_per_day, sizeof(float));
+        write(fd, &curr->EOM_assets_minus_bills, sizeof(float));
+        write(fd, &curr->day_change, sizeof(float));
 
         write(fd, &curr->note, NOTE_LEN);
     
@@ -433,7 +426,7 @@ static int update_note(void) {
 
     raw_read_string("\nEnter note: ", new_val_s);
 
-    record_t *curr = long_term_record_ll_new;
+    record_t *curr = long_term_record_ll;
     for (int i = 1; i < ud_line; i++) {
         curr = curr->next_rec;
     }
@@ -442,3 +435,4 @@ static int update_note(void) {
 
     return 0;
 }
+
