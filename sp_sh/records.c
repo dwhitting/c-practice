@@ -1,7 +1,8 @@
 #include "stan_hdr.h"
 
 static record_t *long_term_record_ll = NULL;
-static int save_records(void);
+static record_t *RET_long_term_record_ll = NULL;
+static int save_records(work_status ws);
 static int update_day_change(void);
 static int list_records(void);
 static float total_day_change(void);
@@ -45,13 +46,13 @@ int records_menu(void) {
             sort_reccs_by_date();
         }
         if (ch == 'o') {
-            load_records();
+            load_records(ws);
         }
         if (ch == 't') {
             update_note();
         }
         if (ch == 's') {
-            save_records();
+            save_records(ws);
         }
         if (ch == 'u') {
             update_current_EOM();
@@ -92,7 +93,12 @@ static int update_record_date(void) {
 
     int new_bal_i = raw_read_int("\nEnter new value: ");
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }    
 
     if (ud_line > 1) {
         for (int i = 1; i < ud_line; i++) {
@@ -117,13 +123,24 @@ static int update_record_date(void) {
 }
 
 int add_record(record_t *new_record) {
-    record_t *record_head = long_term_record_ll;
+
+    record_t *record_head;
+    if (ws == AD) {
+        record_head = long_term_record_ll;
+    } else if (ws == RET) {
+        record_head = RET_long_term_record_ll;
+    }    
     record_t *curr = record_head;
 
     strcpy(new_record->note, "<new rec added>");
 
     if (curr == NULL) {
-        long_term_record_ll = new_record;
+        if (ws == AD) {
+            long_term_record_ll = new_record;
+        } else if (ws == RET) {
+            RET_long_term_record_ll = new_record;
+        }
+        
         update_day_change();
         return 0;
     }
@@ -146,7 +163,13 @@ static int update_current_EOM(void) {
         return 0;
     }
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
+
     for (int i = 1; i < sel_line; i++) {
         curr = curr->next_rec;
     }
@@ -194,15 +217,30 @@ static int delete_record(void) {
     }
 
     if (rem_line == 1) {
-        record_t *old_head = long_term_record_ll;
-        long_term_record_ll = old_head->next_rec;        
+        record_t *old_head;
+        if (ws == AD) {
+            old_head = long_term_record_ll;
+        } else if (ws == RET) {
+            old_head = RET_long_term_record_ll;
+        }
+        if (ws == AD) {
+            long_term_record_ll = old_head->next_rec; 
+        } else if (ws == RET) {
+            RET_long_term_record_ll = old_head->next_rec;
+        }
+               
         free(old_head);
         printf("\nRemoved first acct\n");
         return 0;
     } 
     
     record_t *prev = NULL;
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
 
     for (int i = 1; i < rem_line; i++) {
         prev = curr;
@@ -218,7 +256,12 @@ static int delete_record(void) {
 
 static int num_records(void) {
     int cnt = 0;
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
 
     if (curr == NULL) {
         return 0;
@@ -239,7 +282,12 @@ static int list_records(void) {
 
     sort_reccs_by_date();
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
@@ -268,7 +316,12 @@ static int full_list_records(void) {
 
     sort_reccs_by_date();
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
@@ -280,8 +333,8 @@ static int full_list_records(void) {
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
         printf("<%2d> %2d %s %4d Days in Month: %d, Days to EOM: %d\n",idx++, curr->day, mon, curr->year, curr->days_in_month, curr->days_till_EOM);
-        printf("Assets: %.2f, CC: %.2f, Inc: %.2f, RET Inc: %.2f\n", curr->assets_total, curr->cc_used_total, curr->income_total, curr->RET_income_total);
-        printf("Bill: %.2f, Per d: %.2f, RET Per d: %.2f\n", curr->bills_total, curr->per_day, curr->RET_per_day);
+        printf("Assets: %.2f, CC: %.2f, Inc: %.2f\n", curr->assets_total, curr->cc_used_total, curr->income_total);
+        printf("Bill: %.2f, Per d: %.2f\n", curr->bills_total, curr->per_day);
         printf("EOM Assets-Bills: %.2f, day change: %.2f\n\n", curr->EOM_assets_minus_bills, curr->day_change);
         
         curr = curr->next_rec;
@@ -297,7 +350,12 @@ static int full_list_records(void) {
 
 static int update_day_change(void) {
     record_t *records_head;
-    records_head = long_term_record_ll;
+    if (ws == AD) {
+        records_head = long_term_record_ll;
+    } else if (ws == RET) {
+        records_head = RET_long_term_record_ll;
+    }
+    
     record_t *curr = records_head;
 
     if (records_head == NULL) {
@@ -307,8 +365,6 @@ static int update_day_change(void) {
 
     if (num_records() == 1) {
         curr->day_change = 0.0;
-        curr->day -= 1;
-        printf("Day %d\n", curr->day);
         return 0;
     }
 
@@ -324,7 +380,13 @@ static int update_day_change(void) {
 
 static float total_day_change(void) {
 
-    record_t*curr = long_term_record_ll;
+    record_t*curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
+
     float sum = 0.0;
 
     while (curr != NULL) {
@@ -337,7 +399,12 @@ static float total_day_change(void) {
 
 static int sort_reccs_by_date(void) {
 
-    record_t *input_head = long_term_record_ll;
+    record_t *input_head;
+    if (ws == AD) {
+        input_head = long_term_record_ll;
+    } else if (ws == RET) {
+        input_head = RET_long_term_record_ll;
+    }
 
     /* zero or 1 elements already sorted */
     if (input_head == NULL || input_head->next_rec == NULL) {
@@ -368,17 +435,29 @@ static int sort_reccs_by_date(void) {
         curr = next_node;
     }
 
-    long_term_record_ll = dummy.next_rec;
+    if (ws == AD) {
+        long_term_record_ll = dummy.next_rec;
+    }else if (ws == RET) {
+        RET_long_term_record_ll = dummy.next_rec;
+    }
+    
 
     return 0;
 }
 
-int load_records(void) {
+int load_records(work_status ws) {
 
     int fd;
     char full_path[200];   /* since file is 100 */
     char file[ACCT_NAME_LEN];
-    strcpy(file, "record_data");
+
+    if (ws == AD) {
+        strcpy(file, "record_data");
+    } else if (ws == RET) {
+        strcpy(file, "record_data_RET");
+    }
+
+    
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_RDONLY);
@@ -424,10 +503,10 @@ int load_records(void) {
         read(fd, &node_read->assets_total, sizeof(float));
         read(fd, &node_read->cc_used_total, sizeof(float));
         read(fd, &node_read->income_total, sizeof(float));
-        read(fd, &node_read->RET_income_total, sizeof(float));
+        //read(fd, &node_read->RET_income_total, sizeof(float));
         read(fd, &node_read->bills_total, sizeof(float));
         read(fd, &node_read->per_day, sizeof(float));
-        read(fd, &node_read->RET_per_day, sizeof(float));
+        //read(fd, &node_read->RET_per_day, sizeof(float));
         read(fd, &node_read->EOM_assets_minus_bills, sizeof(float));
         read(fd, &node_read->day_change, sizeof(float));
 
@@ -446,14 +525,25 @@ int load_records(void) {
     }
 
     close(fd);
-    long_term_record_ll = head;
+    if (ws == AD) {
+        long_term_record_ll = head;
+    } else if (ws == RET) {
+        RET_long_term_record_ll = head;
+    }
+    
     
     return 0;
 
 }
 
 int free_records(void) {
-    record_t *head = long_term_record_ll;
+    record_t *head;
+    if (ws == AD) {
+        head = long_term_record_ll;
+    } else if (ws == RET) {
+        head = RET_long_term_record_ll;
+    }
+
     record_t *curr = head;
     record_t *next = NULL;
 
@@ -463,18 +553,29 @@ int free_records(void) {
         curr = next;
     }
     
-    long_term_record_ll = NULL;
+    if (ws == AD) {
+        long_term_record_ll = NULL;
+    } else if (ws == RET) {
+        RET_long_term_record_ll = NULL;
+    }
+    
     return 0;
 }
 
-static int save_records(void) {
+static int save_records(work_status ws) {
 
     sort_reccs_by_date();
     
     int fd;
     char full_path[200];     /* since file is 100 */
     char file[ACCT_NAME_LEN];
-    strcpy(file, "record_data");
+
+    if (ws == AD) {
+        strcpy(file, "record_data");
+    } else if (ws == RET) {
+        strcpy(file, "record_data_RET");
+    }
+    
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
     fd = open(full_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -483,7 +584,13 @@ static int save_records(void) {
         stan_err("open file to save data failed");
     }
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
+  
     while (curr != NULL) {
         record_t *temp_save = curr->next_rec;
         curr->next_rec = NULL;
@@ -497,10 +604,10 @@ static int save_records(void) {
         write(fd, &curr->assets_total, sizeof(float));
         write(fd, &curr->cc_used_total, sizeof(float));
         write(fd, &curr->income_total, sizeof(float));
-        write(fd, &curr->RET_income_total, sizeof(float));
+        //write(fd, &curr->RET_income_total, sizeof(float));
         write(fd, &curr->bills_total, sizeof(float));
         write(fd, &curr->per_day, sizeof(float));
-        write(fd, &curr->RET_per_day, sizeof(float));
+        //write(fd, &curr->RET_per_day, sizeof(float));
         write(fd, &curr->EOM_assets_minus_bills, sizeof(float));
         write(fd, &curr->day_change, sizeof(float));
 
@@ -524,7 +631,13 @@ static int update_note(void) {
 
     raw_read_string("\nEnter note: ", new_val_s);
 
-    record_t *curr = long_term_record_ll;
+    record_t *curr;
+    if (ws == AD) {
+        curr = long_term_record_ll;
+    } else if (ws == RET) {
+        curr = RET_long_term_record_ll;
+    }
+
     for (int i = 1; i < ud_line; i++) {
         curr = curr->next_rec;
     }

@@ -30,6 +30,13 @@ typedef enum {
     None, JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC
 } Month;
 
+typedef enum {
+    AD,
+    RET
+} work_status;
+
+extern work_status ws;
+
 typedef struct {
     AcctType acct_Type;
 } acct_type_t;
@@ -56,10 +63,10 @@ typedef struct _record_t {
     float assets_total;
     float cc_used_total;
     float income_total;
-    float RET_income_total;
+    //float RET_income_total;
     float bills_total;
     float per_day;
-    float RET_per_day;
+    //float RET_per_day;
     float EOM_assets_minus_bills;
     float day_change;
 
@@ -97,7 +104,7 @@ int last_day_curr_month(void);
 int records_menu(void);
 acct_t *get_new_acct(void);
 int free_records(void);
-int load_records(void);
+int load_records(work_status ws);
 int add_record(record_t *new_record);
 
 #endif

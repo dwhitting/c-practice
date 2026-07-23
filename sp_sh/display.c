@@ -117,11 +117,17 @@ int display_main(void) {
         new_record->days_till_EOM = days_til_month_end;
         new_record->assets_total = assets_total;
         new_record->cc_used_total = cc_used_total;
-        new_record->income_total = income_total;
-        new_record->RET_income_total = RET_income_total;
+        if (ws == AD) {
+            new_record->income_total = income_total;
+            //new_record->RET_income_total = RET_income_total;
+            new_record->per_day = per_day;
+            //new_record->RET_per_day = RET_per_day;
+        } else if (ws == RET) {
+            new_record->income_total = RET_income_total;
+            new_record->per_day = RET_per_day;
+        }
+
         new_record->bills_total = bills_total;
-        new_record->per_day = per_day;
-        new_record->RET_per_day = RET_per_day;
         new_record->EOM_assets_minus_bills = EOM_assets_minus_bills;
 
         add_record(new_record);

@@ -4,7 +4,6 @@ static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
-static acct_t *long_term_record_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
@@ -241,8 +240,6 @@ acct_t *get_acct_head(acct_type_t acct_type) {
         return bill_accts_ll;
     } else if (acct_type.acct_Type == incomeAcct) {
         return income_ll;
-    } else if (acct_type.acct_Type == recordAcct) {
-        return long_term_record_ll;
     } else {
         stan_err("acct in get_acct_head not recognized");
     }
@@ -258,8 +255,6 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
         bill_accts_ll = input_node;
     } else if (acct_type.acct_Type == incomeAcct) {
         income_ll = input_node;
-    } else if (acct_type.acct_Type == recordAcct) {
-        long_term_record_ll = input_node;
     } else {
         stan_err("acct type in set_acct_head not recognized");
     }
@@ -555,8 +550,6 @@ static int add_acct(acct_type_t acct_type) {
             bill_accts_ll = head;
         } else if (acct_type.acct_Type == incomeAcct) {
             income_ll = head;
-        } else if (acct_type.acct_Type == recordAcct) {
-            long_term_record_ll = head;
         }
         
     }
@@ -577,8 +570,6 @@ static int save_accts(acct_type_t acct_type) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
         strcpy(file, "income_data");
-    } else if (acct_type.acct_Type == recordAcct) {
-        strcpy(file, "record_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
@@ -626,7 +617,7 @@ int load_all_accts(void) {
     acct_type.acct_Type = incomeAcct;
     load_accts(acct_type);
 
-    load_records();
+    load_records(ws);
 
     return 0;
 }
@@ -644,8 +635,6 @@ int load_accts(acct_type_t acct_type) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
         strcpy(file, "income_data");
-    } else if (acct_type.acct_Type == recordAcct) {
-        strcpy(file, "record_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 

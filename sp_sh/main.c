@@ -1,5 +1,7 @@
 #include "stan_hdr.h"
 
+work_status ws = AD;
+
 int main() {
 
     load_all_accts();
@@ -7,6 +9,7 @@ int main() {
     while (1) {
         
         printf("\nMenu: (***Run on Parallels [folder path]***)\n");
+        printf("(A) AD, (R) RET\n");
         printf("(b) Bank accts\n");
         printf("(l) Bills\n");
         printf("(i) Income\n");
@@ -30,6 +33,14 @@ int main() {
             display_main();
         } else if (ch == 'r') {
             records_menu();
+        } else if (ch == 'A') {
+            printf("\nSet of AD\n\n");
+            ws = AD;
+            load_records(ws);
+        } else if (ch == 'R') {
+            printf("\nSet to RET\n\n");
+            ws = RET;
+            load_records(ws);
         }
     }
     
