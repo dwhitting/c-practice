@@ -2,7 +2,6 @@
 
 static record_t *long_term_record_ll = NULL;
 static record_t *RET_long_term_record_ll = NULL;
-static int save_records(work_status ws);
 static int update_day_change(void);
 static int list_records(void);
 static float total_day_change(void);
@@ -562,7 +561,7 @@ int free_records(void) {
     return 0;
 }
 
-static int save_records(work_status ws) {
+int save_records(work_status ws) {
 
     sort_reccs_by_date();
     

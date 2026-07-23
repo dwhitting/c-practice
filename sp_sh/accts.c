@@ -4,6 +4,7 @@ static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
+static acct_t *RET_income_ll = NULL;
 
 static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
@@ -239,7 +240,12 @@ acct_t *get_acct_head(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == billAcct) {
         return bill_accts_ll;
     } else if (acct_type.acct_Type == incomeAcct) {
-        return income_ll;
+        if (ws == AD) {
+            return income_ll;
+        } else if (ws == RET) {
+            return RET_income_ll;
+        }
+        
     } else {
         stan_err("acct in get_acct_head not recognized");
     }
@@ -254,7 +260,12 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
     } else if (acct_type.acct_Type == billAcct) {
         bill_accts_ll = input_node;
     } else if (acct_type.acct_Type == incomeAcct) {
-        income_ll = input_node;
+        if (ws == AD) {
+            income_ll = input_node;;
+        } else if (ws == RET) {
+            RET_income_ll = input_node;
+        }
+        
     } else {
         stan_err("acct type in set_acct_head not recognized");
     }
@@ -465,7 +476,12 @@ int list_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == billAcct) {
         curr = bill_accts_ll;
     } else if (acct_type.acct_Type == incomeAcct) {
-        curr = income_ll;
+        if (ws == AD) {
+            curr = income_ll;
+        } else if (ws == RET) {
+            curr = RET_income_ll;
+        }
+        
     } 
 
     if (curr == NULL) {
@@ -549,7 +565,12 @@ static int add_acct(acct_type_t acct_type) {
         } else if (acct_type.acct_Type == billAcct) {
             bill_accts_ll = head;
         } else if (acct_type.acct_Type == incomeAcct) {
-            income_ll = head;
+            if (ws == AD) {
+                income_ll = head;
+            } else if (ws == RET) {
+                RET_income_ll = head;
+            }
+            
         }
         
     }
@@ -569,7 +590,12 @@ static int save_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == billAcct) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
-        strcpy(file, "income_data");
+        if (ws == AD) {
+            strcpy(file, "income_data");
+        } else if (ws == RET) {
+            strcpy(file, "income_data_RET");
+        }
+        
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
@@ -598,6 +624,26 @@ static int save_accts(acct_type_t acct_type) {
     }
 
     close(fd);
+
+    return 0;
+}
+
+int save_all_accts(void) {
+    acct_type_t acct_type;
+
+    acct_type.acct_Type = bnkAcct;
+    save_accts(acct_type);
+
+    acct_type.acct_Type = credAcct;
+    save_accts(acct_type);
+
+    acct_type.acct_Type = billAcct;
+    save_accts(acct_type);
+
+    acct_type.acct_Type = incomeAcct;
+    save_accts(acct_type);
+
+    save_records(ws);
 
     return 0;
 }
@@ -634,6 +680,11 @@ int load_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == billAcct) {
         strcpy(file, "bill_data");
     } else if (acct_type.acct_Type == incomeAcct) {
+        if (ws == AD) {
+            strcpy(file, "income_data");
+        } else if (ws == RET) {
+            strcpy(file, "income_data_RET");
+        }
         strcpy(file, "income_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);

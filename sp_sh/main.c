@@ -35,12 +35,16 @@ int main() {
             records_menu();
         } else if (ch == 'A') {
             printf("\nSet of AD\n\n");
+            save_all_accts();
+            accts_exit();
             ws = AD;
-            load_records(ws);
+            load_all_accts();
         } else if (ch == 'R') {
             printf("\nSet to RET\n\n");
+            save_all_accts();
+            accts_exit();
             ws = RET;
-            load_records(ws);
+            load_all_accts();
         }
     }
     

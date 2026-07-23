@@ -106,5 +106,7 @@ acct_t *get_new_acct(void);
 int free_records(void);
 int load_records(work_status ws);
 int add_record(record_t *new_record);
+int save_all_accts(void);
+int save_records(work_status ws);
 
 #endif
