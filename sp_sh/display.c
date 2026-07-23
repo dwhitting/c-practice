@@ -188,7 +188,12 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
     bill_head = get_acct_head(acct_bill);
     prev = curr;
 
-    printf("\n      Bills:\n");
+    if (ws == AD) {
+        printf("\n      Bills:\n");
+    } else if (ws == RET) {
+        printf("\n (RET)  Bills:\n");
+    }
+    
 
     while (curr != NULL) {
 

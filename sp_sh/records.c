@@ -603,10 +603,8 @@ int save_records(work_status ws) {
         write(fd, &curr->assets_total, sizeof(float));
         write(fd, &curr->cc_used_total, sizeof(float));
         write(fd, &curr->income_total, sizeof(float));
-        //write(fd, &curr->RET_income_total, sizeof(float));
         write(fd, &curr->bills_total, sizeof(float));
         write(fd, &curr->per_day, sizeof(float));
-        //write(fd, &curr->RET_per_day, sizeof(float));
         write(fd, &curr->EOM_assets_minus_bills, sizeof(float));
         write(fd, &curr->day_change, sizeof(float));
 

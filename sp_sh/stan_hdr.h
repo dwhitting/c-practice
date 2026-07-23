@@ -63,10 +63,8 @@ typedef struct _record_t {
     float assets_total;
     float cc_used_total;
     float income_total;
-    //float RET_income_total;
     float bills_total;
     float per_day;
-    //float RET_per_day;
     float EOM_assets_minus_bills;
     float day_change;
 

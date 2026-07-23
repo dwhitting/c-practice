@@ -3,6 +3,7 @@
 static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
+static acct_t *RET_bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
 static acct_t *RET_income_ll = NULL;
 
@@ -238,7 +239,11 @@ acct_t *get_acct_head(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         return cc_accts_ll;
     } else if (acct_type.acct_Type == billAcct) {
-        return bill_accts_ll;
+        if (ws == AD) {
+            return bill_accts_ll;
+        } else if (ws == RET) {
+            return RET_bill_accts_ll;
+        }
     } else if (acct_type.acct_Type == incomeAcct) {
         if (ws == AD) {
             return income_ll;
@@ -258,7 +263,12 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
     } else if (acct_type.acct_Type == credAcct) {
         cc_accts_ll = input_node;
     } else if (acct_type.acct_Type == billAcct) {
-        bill_accts_ll = input_node;
+        if (ws == AD) {
+            bill_accts_ll = input_node;
+        } else if (ws == RET) {
+            RET_bill_accts_ll = input_node;
+        }
+        
     } else if (acct_type.acct_Type == incomeAcct) {
         if (ws == AD) {
             income_ll = input_node;;
@@ -278,7 +288,12 @@ static char *get_acct_type_name(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         return "Credit Account";
     } else if (acct_type.acct_Type == billAcct) {
-        return "Bill Account";
+        if (ws == AD) {
+            return "Bill Account";
+        } else if (ws == RET) {
+            return "RET Bill Account";
+        }
+        
     } else if (acct_type.acct_Type == incomeAcct) {
         return "Income Account";
     } else {
@@ -474,7 +489,12 @@ int list_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         curr = cc_accts_ll;
     } else if (acct_type.acct_Type == billAcct) {
-        curr = bill_accts_ll;
+        if (ws == AD) {
+            curr = bill_accts_ll;
+        } else if (ws == RET) {
+            curr = RET_bill_accts_ll;
+        }
+        
     } else if (acct_type.acct_Type == incomeAcct) {
         if (ws == AD) {
             curr = income_ll;
@@ -515,7 +535,12 @@ int list_accts(acct_type_t acct_type) {
         float total = total_acct_balance(acct_type);
         char s_total[STR_NUM_LEN];
         float_to_currency(total, s_total);
-        printf("\nTotal Bills: %s\n", s_total);
+        if (ws == AD) {
+            printf("\nTotal Bills: %s\n", s_total);
+        } else if (ws == RET) {
+            printf("\nTotal (RET) Bills: %s\n", s_total);
+        }
+        
     }
 
     if (acct_type.acct_Type == credAcct) {
@@ -563,7 +588,12 @@ static int add_acct(acct_type_t acct_type) {
         } else if (acct_type.acct_Type == credAcct) {
             cc_accts_ll = head;
         } else if (acct_type.acct_Type == billAcct) {
-            bill_accts_ll = head;
+            if (ws == AD) {
+                bill_accts_ll = head;
+            } else if (ws == RET) {
+                RET_bill_accts_ll = head;
+            }
+            
         } else if (acct_type.acct_Type == incomeAcct) {
             if (ws == AD) {
                 income_ll = head;
@@ -588,7 +618,12 @@ static int save_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         strcpy(file, "cc_data");
     } else if (acct_type.acct_Type == billAcct) {
-        strcpy(file, "bill_data");
+        if (ws == AD) {
+            strcpy(file, "bill_data");
+        } else if (ws == RET) {
+            strcpy(file, "bill_data_RET");
+        }
+        
     } else if (acct_type.acct_Type == incomeAcct) {
         if (ws == AD) {
             strcpy(file, "income_data");
@@ -678,7 +713,12 @@ int load_accts(acct_type_t acct_type) {
     } else if (acct_type.acct_Type == credAcct) {
         strcpy(file, "cc_data");      
     } else if (acct_type.acct_Type == billAcct) {
-        strcpy(file, "bill_data");
+        if (ws == AD) {
+            strcpy(file, "bill_data");
+        } else if (ws == RET) {
+            strcpy(file, "bill_data_RET");
+        }
+        
     } else if (acct_type.acct_Type == incomeAcct) {
         if (ws == AD) {
             strcpy(file, "income_data");
