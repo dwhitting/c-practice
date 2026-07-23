@@ -7,7 +7,7 @@ static int list_bills(float *EOM_assets_minus_bills, float accts_combined_val);
 
 int display_main(void) {
 
-    float RET_income_total = 5500.0 + 2000.0; // monthly plus VA w/ 2.1k taken out for M
+    //float RET_income_total = 5500.0 + 2000.0; // monthly plus VA w/ 2.1k taken out for M
 
     char s_temp[STR_NUM_LEN];   /* used to store all floats converted to string currency */
     int month_last_day = last_day_curr_month();
@@ -28,17 +28,9 @@ int display_main(void) {
     float income_total = 0.0;
     list_income(&income_total);
 
-    /* RET only block */
-    printf("        Retired per m: $%.2f\n", RET_income_total);        
-    /* ======= END ========== */
-
     acct_type_t bills_acct_type = {.acct_Type = billAcct};
     float bills_total = total_acct_balance(bills_acct_type);
     float per_day = (income_total - bills_total) / days_in_curr_month;
-
-    /* RET only block */        
-    float RET_per_day = (RET_income_total - bills_total) / days_in_curr_month;   
-    /* ======== END ============*/
 
     /* list bills */
     float EOM_assets_minus_bills;
@@ -50,18 +42,8 @@ int display_main(void) {
     float_to_currency((income_total - bills_total), s_temp);
     printf("\nIncome - Bills: %s\n", s_temp);
 
-    /* RET only block */
-    float_to_currency((RET_income_total - bills_total), s_temp);             
-    printf("RET Income - Bills: %s\n", s_temp);                    
-    /* ============= END ========== */
-
     float_to_currency(per_day, s_temp);
     printf("Per Day: %s\n", s_temp);
-
-    /* RET only block */
-    float_to_currency(RET_per_day, s_temp);                      
-    printf("RET Per Day: %s\n", s_temp);                       
-    /* ======== END =========== */
 
     acct_t *today = malloc(sizeof(acct_t));
     get_date(today);
@@ -73,12 +55,6 @@ int display_main(void) {
     char s_daily_adjust_to_EOM[STR_NUM_LEN] = "";
     float_to_currency(daily_adjust_to_EOM, s_daily_adjust_to_EOM);
 
-    /* RET only block */
-    float RET_daily_adjust_to_EOM = days_til_month_end * RET_per_day;  
-    char s_RET_daily_adjust_to_EOM[STR_NUM_LEN] = "";               
-    float_to_currency(RET_daily_adjust_to_EOM, s_RET_daily_adjust_to_EOM);
-    /* ======= END ======== */
-
     float_to_currency(EOM_assets_minus_bills, s_temp);
     printf("\nEOM Assets-Bills: %s (-%s)(%d(s)) (Date: %d %s)\n", 
         s_temp, s_daily_adjust_to_EOM, days_til_month_end, 
@@ -86,16 +62,6 @@ int display_main(void) {
     float_to_currency((EOM_assets_minus_bills - daily_adjust_to_EOM), s_temp);
     printf("%d %s %d Final EOM Assets-Bills-Daily Adj: %s\n",today->day, s_curr_mon, 
         today->year, s_temp);
-
-    /* for RET only */
-    float_to_currency(EOM_assets_minus_bills, s_temp);
-    printf("\nRET EOM Assets-Bills: %s (-%s)(%d(s)) (Date: %d %s)\n", 
-        s_temp, s_RET_daily_adjust_to_EOM, days_til_month_end, 
-        month_last_day, s_curr_mon);
-    float_to_currency((EOM_assets_minus_bills - RET_daily_adjust_to_EOM), s_temp);  //same EOM...
-    printf("%d %s %d RET Final EOM Assets-Bills-Daily Adj: %s\n",today->day, s_curr_mon, 
-        today->year, s_temp);
-    /* ======= END ============== */
 
     /* add new record */
     printf("\nAdd Record? (y)...");
@@ -117,15 +83,8 @@ int display_main(void) {
         new_record->days_till_EOM = days_til_month_end;
         new_record->assets_total = assets_total;
         new_record->cc_used_total = cc_used_total;
-        if (ws == AD) {
-            new_record->income_total = income_total;
-            //new_record->RET_income_total = RET_income_total;
-            new_record->per_day = per_day;
-            //new_record->RET_per_day = RET_per_day;
-        } else if (ws == RET) {
-            new_record->income_total = RET_income_total;
-            new_record->per_day = RET_per_day;
-        }
+        new_record->income_total = income_total;
+        new_record->per_day = per_day;
 
         new_record->bills_total = bills_total;
         new_record->EOM_assets_minus_bills = EOM_assets_minus_bills;
