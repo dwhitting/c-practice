@@ -11,13 +11,14 @@ static int delete_record(void);
 static int num_records(void);
 static int select_record_line(void);
 static int update_current_EOM(void);
+static int update_record_date(void);
+static int full_list_records(void);
 //static int transfer_recs(void);
 
 int records_menu(void) {
 
     while (1) {
         printf("\nRecords Main Menu:\n");
-        //printf("(a) Add Record\n");
         printf("(l) List Record(s)\n");
         printf("(u) Update Current EOM\n");
         printf("(m) Update Month, Day, or Year\n");
@@ -25,22 +26,24 @@ int records_menu(void) {
         printf("(t) Update Note\n");
         printf("(s) Save Record(s)\n");
         printf("(d) Delete Record\n");
+        printf("(f) Full Record List\n");
 
         printf("(q) Quit Records\n");
         printf("\nEnter selection: ");
         char ch = single_char_input();
-        // if (ch == 'a') {
-        //     add_acct(acct_type);  CLASH WITH DISPLAY ADD REC
-        // }
+        if (ch == 'f') {
+            full_list_records();
+        }
         if (ch == 'l') {
             list_records();
             printf("\nPress key to continue...");
             fflush(stdout);
             single_char_input();
         }
-        // if (ch == 'm') {
-        //     update_cred_date(acct_type);
-        //     sort_by_date(acct_type, get_acct_head(acct_type));
+        if (ch == 'm') {
+            update_record_date();
+            sort_reccs_by_date();
+        }
         if (ch == 'o') {
             load_records();
         }
@@ -64,15 +67,64 @@ int records_menu(void) {
     return 0;
 }
 
+static int update_record_date(void) {
+
+    list_records();
+
+    char day_or_month;
+    printf("(d) Day or (m) Month (y) Year: ");
+    fflush(stdout);
+    while (1) {
+        day_or_month = single_char_input();
+        if (day_or_month == 'd' || day_or_month == 'm' || day_or_month == 'y') {
+            break;
+        }
+    }
+    printf("char: %c\n", day_or_month);
+
+    long ud_line = raw_read_long("Enter number to update: ");
+
+    int total_nodes = num_records();
+    if (ud_line < 1 || ud_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
+    int new_bal_i = raw_read_int("\nEnter new value: ");
+
+    record_t *curr = long_term_record_ll;
+
+    if (ud_line > 1) {
+        for (int i = 1; i < ud_line; i++) {
+            curr = curr->next_rec;
+        }
+    } 
+
+    if (day_or_month == 'd') {
+        curr->day = new_bal_i;
+    } else if (day_or_month == 'm') {
+        curr->month = new_bal_i;
+    } else if (day_or_month == 'y') {
+        curr->year = new_bal_i;
+    }
+    curr->date_sort = (10000 * curr->year) + (100 * curr->month) + curr->day; 
+
+    printf("\n date sort: %d\n", curr->date_sort);
+
+    printf("\nAcct updated\n");
+
+    return 0;
+}
+
 int add_record(record_t *new_record) {
     record_t *record_head = long_term_record_ll;
     record_t *curr = record_head;
 
-    printf("in add rec: %d\n", new_record->date_sort);
     strcpy(new_record->note, "<new rec added>");
 
     if (curr == NULL) {
         long_term_record_ll = new_record;
+        update_day_change();
         return 0;
     }
 
@@ -81,6 +133,7 @@ int add_record(record_t *new_record) {
     }
 
     curr->next_rec = new_record;
+    update_day_change();
 
     return 0;
 }
@@ -99,7 +152,7 @@ static int update_current_EOM(void) {
     }
 
     int new_bal_i = raw_read_int("\nEnter new value: ");
-    //curr->income_minus_bills = new_bal_i;
+    curr->EOM_assets_minus_bills = new_bal_i;
 
     printf("Value updated\n");
 
@@ -115,7 +168,7 @@ static int select_record_line(void) {
     }
 
     list_records();
-    int sel_line = raw_read_int("Enter number to remove: ");
+    int sel_line = raw_read_int("Enter selection: ");
 
     if (sel_line < 1 || sel_line > total_nodes) {
         printf("\nSelection out of range\n");
@@ -166,6 +219,15 @@ static int delete_record(void) {
 static int num_records(void) {
     int cnt = 0;
     record_t *curr = long_term_record_ll;
+
+    if (curr == NULL) {
+        return 0;
+    }
+
+    if (curr->next_rec == NULL) {
+        return ++cnt;
+    }
+
     while (curr != NULL) {
         cnt++;
         curr = curr->next_rec;
@@ -175,7 +237,6 @@ static int num_records(void) {
 
 static int list_records(void) {
 
-    update_day_change();
     sort_reccs_by_date();
 
     record_t *curr = long_term_record_ll;
@@ -189,8 +250,39 @@ static int list_records(void) {
 
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
-        printf("<%2d> %2d %s %4d Assets-Bills: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
-            (curr->assets_total - curr->bills_total), curr->EOM_assets_minus_bills, curr->day_change, curr->note); 
+        printf("<%2d> %2d %s %4d Assets-CC: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
+            (curr->assets_total - curr->cc_used_total), curr->EOM_assets_minus_bills, curr->day_change, curr->note); 
+        
+        curr = curr->next_rec;
+    }       
+
+    float total = total_day_change();
+    char s_total[STR_NUM_LEN];
+    float_to_currency(total, s_total);
+    printf("\nTotal change: %s\n", s_total);        
+
+    return 0;
+}
+
+static int full_list_records(void) {
+
+    sort_reccs_by_date();
+
+    record_t *curr = long_term_record_ll;
+
+    if (curr == NULL) {
+        printf("\nlinked list is empty\n");
+        return 0;
+    }
+
+    int idx = 1;
+
+    while (curr != NULL) {
+        char *mon = month_to_str(curr->month);
+        printf("<%2d> %2d %s %4d Days in Month: %d, Days to EOM: %d\n",idx++, curr->day, mon, curr->year, curr->days_in_month, curr->days_till_EOM);
+        printf("Assets: %.2f, CC: %.2f, Inc: %.2f, RET Inc: %.2f\n", curr->assets_total, curr->cc_used_total, curr->income_total, curr->RET_income_total);
+        printf("Bill: %.2f, Per d: %.2f, RET Per d: %.2f\n", curr->bills_total, curr->per_day, curr->RET_per_day);
+        printf("EOM Assets-Bills: %.2f, day change: %.2f\n\n", curr->EOM_assets_minus_bills, curr->day_change);
         
         curr = curr->next_rec;
     }       
@@ -209,19 +301,38 @@ static int update_day_change(void) {
     record_t *curr = records_head;
 
     if (records_head == NULL) {
-        printf("*** Records linked list is NULL\n");
+        printf("*** Records linked list is NULL ***\n");
+        return 0;
+    }
+
+    if (num_records() == 1) {
+        curr->day_change = 0.0;
+        curr->day -= 1;
+        printf("Day %d\n", curr->day);
         return 0;
     }
 
     float prev_bal = 0.0;
-    curr->per_day = 0.0;
-    while (curr->next_rec != NULL) {
+    while (curr->next_rec != NULL) { 
         prev_bal = curr->EOM_assets_minus_bills - (curr->per_day * curr->days_till_EOM);
         curr = curr->next_rec;
-        curr->day_change = (curr->EOM_assets_minus_bills - (curr->per_day * curr->days_till_EOM)) - prev_bal;
     }
+    curr->day_change = (curr->EOM_assets_minus_bills - (curr->per_day * curr->days_till_EOM)) - prev_bal;    
 
     return 0;
+}
+
+static float total_day_change(void) {
+
+    record_t*curr = long_term_record_ll;
+    float sum = 0.0;
+
+    while (curr != NULL) {
+        sum += curr->day_change;
+        curr = curr->next_rec;
+    }
+    
+    return sum;
 }
 
 static int sort_reccs_by_date(void) {
@@ -260,19 +371,6 @@ static int sort_reccs_by_date(void) {
     long_term_record_ll = dummy.next_rec;
 
     return 0;
-}
-
-static float total_day_change(void) {
-
-    record_t*curr = long_term_record_ll;
-    float sum = 0.0;
-
-    while (curr != NULL) {
-        sum += curr->per_day;
-        curr = curr->next_rec;
-    }
-    
-    return sum;
 }
 
 int load_records(void) {
