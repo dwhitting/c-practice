@@ -685,7 +685,6 @@ int load_accts(acct_type_t acct_type) {
         } else if (ws == RET) {
             strcpy(file, "income_data_RET");
         }
-        strcpy(file, "income_data");
     }
     snprintf(full_path, sizeof(full_path), "%s/%s", DOC_PATH, file);
 
