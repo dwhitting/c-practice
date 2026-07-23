@@ -1,7 +1,6 @@
 #include "stan_hdr.h"
 
 static record_t *long_term_record_ll = NULL;
-static record_t *RET_long_term_record_ll = NULL;
 static int update_day_change(void);
 static int list_records(void);
 static float total_day_change(void);
@@ -13,7 +12,6 @@ static int select_record_line(void);
 static int update_current_EOM(void);
 static int update_record_date(void);
 static int full_list_records(void);
-//static int transfer_recs(void);
 
 int records_menu(void) {
 
@@ -93,11 +91,7 @@ static int update_record_date(void) {
     int new_bal_i = raw_read_int("\nEnter new value: ");
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }    
+    curr = long_term_record_ll;
 
     if (ud_line > 1) {
         for (int i = 1; i < ud_line; i++) {
@@ -124,22 +118,13 @@ static int update_record_date(void) {
 int add_record(record_t *new_record) {
 
     record_t *record_head;
-    if (ws == AD) {
-        record_head = long_term_record_ll;
-    } else if (ws == RET) {
-        record_head = RET_long_term_record_ll;
-    }    
+    record_head = long_term_record_ll;  
     record_t *curr = record_head;
 
     strcpy(new_record->note, "<new rec added>");
 
     if (curr == NULL) {
-        if (ws == AD) {
-            long_term_record_ll = new_record;
-        } else if (ws == RET) {
-            RET_long_term_record_ll = new_record;
-        }
-        
+        long_term_record_ll = new_record;        
         update_day_change();
         return 0;
     }
@@ -163,11 +148,7 @@ static int update_current_EOM(void) {
     }
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     for (int i = 1; i < sel_line; i++) {
         curr = curr->next_rec;
@@ -217,17 +198,8 @@ static int delete_record(void) {
 
     if (rem_line == 1) {
         record_t *old_head;
-        if (ws == AD) {
-            old_head = long_term_record_ll;
-        } else if (ws == RET) {
-            old_head = RET_long_term_record_ll;
-        }
-        if (ws == AD) {
-            long_term_record_ll = old_head->next_rec; 
-        } else if (ws == RET) {
-            RET_long_term_record_ll = old_head->next_rec;
-        }
-               
+        old_head = long_term_record_ll;
+        long_term_record_ll = old_head->next_rec;                
         free(old_head);
         printf("\nRemoved first acct\n");
         return 0;
@@ -235,11 +207,7 @@ static int delete_record(void) {
     
     record_t *prev = NULL;
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     for (int i = 1; i < rem_line; i++) {
         prev = curr;
@@ -256,11 +224,7 @@ static int delete_record(void) {
 static int num_records(void) {
     int cnt = 0;
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     if (curr == NULL) {
         return 0;
@@ -282,11 +246,7 @@ static int list_records(void) {
     sort_reccs_by_date();
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
@@ -316,11 +276,7 @@ static int full_list_records(void) {
     sort_reccs_by_date();
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
@@ -349,11 +305,7 @@ static int full_list_records(void) {
 
 static int update_day_change(void) {
     record_t *records_head;
-    if (ws == AD) {
-        records_head = long_term_record_ll;
-    } else if (ws == RET) {
-        records_head = RET_long_term_record_ll;
-    }
+    records_head = long_term_record_ll;
     
     record_t *curr = records_head;
 
@@ -380,11 +332,7 @@ static int update_day_change(void) {
 static float total_day_change(void) {
 
     record_t*curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     float sum = 0.0;
 
@@ -399,11 +347,7 @@ static float total_day_change(void) {
 static int sort_reccs_by_date(void) {
 
     record_t *input_head;
-    if (ws == AD) {
-        input_head = long_term_record_ll;
-    } else if (ws == RET) {
-        input_head = RET_long_term_record_ll;
-    }
+    input_head = long_term_record_ll;
 
     /* zero or 1 elements already sorted */
     if (input_head == NULL || input_head->next_rec == NULL) {
@@ -434,12 +378,7 @@ static int sort_reccs_by_date(void) {
         curr = next_node;
     }
 
-    if (ws == AD) {
-        long_term_record_ll = dummy.next_rec;
-    }else if (ws == RET) {
-        RET_long_term_record_ll = dummy.next_rec;
-    }
-    
+    long_term_record_ll = dummy.next_rec;    
 
     return 0;
 }
@@ -524,12 +463,8 @@ int load_records(work_status ws) {
     }
 
     close(fd);
-    if (ws == AD) {
-        long_term_record_ll = head;
-    } else if (ws == RET) {
-        RET_long_term_record_ll = head;
-    }
-    
+
+    long_term_record_ll = head;   
     
     return 0;
 
@@ -537,12 +472,7 @@ int load_records(work_status ws) {
 
 int free_records(void) {
     record_t *head;
-    if (ws == AD) {
-        head = long_term_record_ll;
-    } else if (ws == RET) {
-        head = RET_long_term_record_ll;
-    }
-
+    head = long_term_record_ll;
     record_t *curr = head;
     record_t *next = NULL;
 
@@ -552,11 +482,7 @@ int free_records(void) {
         curr = next;
     }
     
-    if (ws == AD) {
-        long_term_record_ll = NULL;
-    } else if (ws == RET) {
-        RET_long_term_record_ll = NULL;
-    }
+    long_term_record_ll = NULL;
     
     return 0;
 }
@@ -584,11 +510,7 @@ int save_records(work_status ws) {
     }
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
   
     while (curr != NULL) {
         record_t *temp_save = curr->next_rec;
@@ -629,11 +551,7 @@ static int update_note(void) {
     raw_read_string("\nEnter note: ", new_val_s);
 
     record_t *curr;
-    if (ws == AD) {
-        curr = long_term_record_ll;
-    } else if (ws == RET) {
-        curr = RET_long_term_record_ll;
-    }
+    curr = long_term_record_ll;
 
     for (int i = 1; i < ud_line; i++) {
         curr = curr->next_rec;
