@@ -10,7 +10,7 @@ int main() {
         
         printf("\nMenu: (***Run on Parallels [folder path]***)\n");
         printf("(A) AD, (R) RET\n");
-        printf("(b) Bank accts\n");
+        printf("(b) Bank and Credit Accts\n");
         printf("(l) Bills\n");
         printf("(i) Income\n");
         printf("(d) Display\n");
