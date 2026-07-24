@@ -14,7 +14,7 @@ int main() {
 
     while (1) {
         
-        printf("\nMenu: (***Run on Parallels [folder path]***)\n");
+        printf("\nMenu:\n");
         printf("(A) AD, (R) RET\n");
         printf("(b) Bank and Credit Accts\n");
         printf("(l) Bills\n");
