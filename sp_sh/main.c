@@ -4,6 +4,12 @@ work_status ws = AD;
 
 int main() {
 
+    struct stat st;
+    if (stat(DOC_PATH, &st) != 0) {
+        printf("Does not look like running from Paralles\n");
+        return 0;
+    }
+
     load_all_accts();
 
     while (1) {

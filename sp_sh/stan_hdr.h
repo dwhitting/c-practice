@@ -12,6 +12,7 @@
 #include <locale.h>
 #include <time.h>
 #include <math.h>
+#include <sys/stat.h>
 
 #define ACCT_NAME_LEN 100
 #define STR_NUM_LEN 20
