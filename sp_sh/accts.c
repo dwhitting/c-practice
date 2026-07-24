@@ -512,6 +512,7 @@ int list_accts(acct_type_t acct_type) {
 
     int idx = 1;
     printf("\n");
+    char s_temp[STR_NUM_LEN];
     while (curr != NULL) {
         if (acct_type.acct_Type == bnkAcct) {
             printf("<%d> %-14s bal: $%.2f\n",idx++,  curr->name, curr->balance);
@@ -521,8 +522,9 @@ int list_accts(acct_type_t acct_type) {
                 (curr->cred_lim - curr->cred_remain), curr->cred_remain, curr->cred_lim);
         } else if (acct_type.acct_Type == billAcct) {
             char *mon = month_to_str(curr->month);
-            printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
-                curr->balance);
+            float_to_currency(curr->balance, s_temp);
+            printf("<%2d> %2d %s %4d %-30s %s\n",idx++, curr->day, mon, curr->year, curr->name, 
+                s_temp);
         } else if (acct_type.acct_Type == incomeAcct) {
             char *mon = month_to_str(curr->month);
             printf("<%2d> %2d %s %4d %-30s bal: $%.2f\n",idx++, curr->day, mon, curr->year, curr->name, 
