@@ -107,5 +107,7 @@ int load_records(work_status ws);
 int add_record(record_t *new_record);
 int save_all_accts(void);
 int save_records(work_status ws);
+int print_accts_menu(acct_type_t acct_type);
+int accts_menu(acct_type_t acct_type);
 
 #endif

@@ -11,12 +11,14 @@ int main() {
     }
 
     load_all_accts();
+    acct_type_t acct_type;
 
     while (1) {
         
         printf("\nMenu:\n");
         printf("(A) AD, (R) RET\n");
-        printf("(b) Bank and Credit Accts\n");
+        printf("(b) Bank\n");
+        printf("(c) Credit\n");
         printf("(l) Bills\n");
         printf("(i) Income\n");
         printf("(d) Display\n");
@@ -30,7 +32,13 @@ int main() {
             printf("\n");
             break;
         } else if (ch == 'b') {
-            accts_main();
+            acct_type.acct_Type = bnkAcct;
+            print_accts_menu(acct_type);
+            accts_menu(acct_type);
+        } else if (ch == 'c') {
+            acct_type.acct_Type = credAcct;
+            print_accts_menu(acct_type);
+            accts_menu(acct_type);
         } else if (ch == 'l') {
             bills_menu();
         } else if (ch == 'i') {

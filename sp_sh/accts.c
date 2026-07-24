@@ -5,7 +5,6 @@ static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
 
-static int accts_menu(acct_type_t acct_type);
 static int delete_acct(acct_type_t acct_type);
 static int add_acct(acct_type_t acct_type);
 static acct_t *new_acct(void);
@@ -15,39 +14,10 @@ static int update_balance(acct_type_t acct_type, char menu_sel);
 static char *get_acct_type_name(acct_type_t acct_type);
 static int update_cred_date(acct_type_t acct_type);
 static int update_acct_name(acct_type_t acct_type);
-static int print_accts_menu(acct_type_t acct_type);
 static int copy_AD_bills_to_RET(void);
 
-int accts_main(void) {
 
-    while (1) {
-        printf("\nAccounts Main Menu:\n");
-        printf("(b) Bank\n");
-        printf("(c) Credit\n");
-        printf("(q) quit\n");
-        printf("\nEnter selection: ");
-        acct_type_t acct_type;
-        char ch = single_char_input();
-        if (ch == 'b') {
-            acct_type.acct_Type = bnkAcct;
-            print_accts_menu(acct_type);
-            accts_menu(acct_type);
-        }
-        if (ch == 'c') {
-            acct_type.acct_Type = credAcct;
-            print_accts_menu(acct_type);
-            accts_menu(acct_type);
-        }
-        if (ch == 'q') {
-            break;
-        }
-    }
-
-    return 0;
-
-}
-
-static int print_accts_menu(acct_type_t acct_type) {
+int print_accts_menu(acct_type_t acct_type) {
 
     int width = 25;
 
@@ -74,7 +44,7 @@ static int print_accts_menu(acct_type_t acct_type) {
 
 }
 
-static int accts_menu(acct_type_t acct_type) {
+int accts_menu(acct_type_t acct_type) {
     
     while (1) {
 
