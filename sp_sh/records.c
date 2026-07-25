@@ -257,8 +257,14 @@ static int list_records(void) {
 
     while (curr != NULL) {
         char *mon = month_to_str(curr->month);
-        printf("<%2d> %2d %s %4d Assets-CC: $%.2f EOM: $%.2f, $%.2f  Note: %s\n",idx++, curr->day, mon, curr->year,  
-            (curr->assets_total - curr->cc_used_total), curr->EOM_assets_minus_bills, curr->day_change, curr->note); 
+        char s_temp_1[STR_NUM_LEN];
+        char s_temp_2[STR_NUM_LEN];
+        char s_temp_3[STR_NUM_LEN];
+        float_to_currency((curr->assets_total - curr->cc_used_total), s_temp_1);
+        float_to_currency(curr->EOM_assets_minus_bills, s_temp_2);
+        float_to_currency(curr->day_change, s_temp_3);
+        printf("<%2d> %2d %s %4d Assets-CC: %s EOM: %s, %s Note: %s\n",idx++, curr->day, mon, curr->year,  
+            s_temp_1, s_temp_2, s_temp_3, curr->note); 
         
         curr = curr->next_rec;
     }       
