@@ -463,7 +463,7 @@ static acct_t *new_acct(void) {
 
 int list_accts(acct_type_t acct_type) {
 
-    acct_t *curr;
+    acct_t *curr = NULL;
         
     if (acct_type.acct_Type == bnkAcct) {
         curr = bnk_accts_ll;
@@ -475,7 +475,7 @@ int list_accts(acct_type_t acct_type) {
         curr = bill_accts_ll;        
     } else if (acct_type.acct_Type == incomeAcct) {
         curr = income_ll;
-    } 
+    }
 
     if (curr == NULL) {
         printf("\nlinked list is empty\n");
