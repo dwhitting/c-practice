@@ -6,7 +6,7 @@ int main() {
 
     struct stat st;
     if (stat(DOC_PATH, &st) != 0) {
-        printf("Does not look like running from Paralles\n");
+        printf("Does not look like running on a known machine\n");
         //return 0;
     }
 
