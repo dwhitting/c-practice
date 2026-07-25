@@ -36,6 +36,7 @@ typedef enum {
 } work_status;
 
 extern work_status ws;
+extern int days_out;
 
 typedef struct {
     AcctType acct_Type;
@@ -107,6 +108,7 @@ int save_all_accts(void);
 int save_records(work_status ws);
 int print_accts_menu(acct_type_t acct_type);
 int accts_menu(acct_type_t acct_type);
+int update_days_out(void);
 
 #endif
 

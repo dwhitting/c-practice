@@ -175,6 +175,8 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
     acct_type_t acct_income;
     acct_income.acct_Type = incomeAcct;
     acct_t *income; 
+    enum EOM_printed { yes, no}
+    EOM_printed = no;
 
     acct_type_t acct_bill;
     acct_t *curr;
@@ -197,9 +199,8 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
 
     while (curr != NULL) {
 
+
         curr_assets_minus_cc_used -= curr->balance;
-        if (curr->date_sort >= today->date_sort) {
-        }
 
         float_to_currency(curr->balance, temp_curr_1);
         float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
@@ -222,6 +223,7 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
             if ((((curr == bill_head && curr->date_sort) && curr->date_sort == income->date_sort)) || 
                 ((prev->date_sort < curr->date_sort) && (curr->date_sort == income->date_sort))) {
                 curr_assets_minus_cc_used += income->balance;
+
                 float_to_currency(income->balance, temp_curr_1);
                 float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
                 printf("%2d %s %4d %-30s%10s, Actual: %s\n",income->day, month_to_str(income->month), 
@@ -230,7 +232,15 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
             income = income->next_acct;            
         }
         
-        if ((curr->next_acct != NULL) && (curr->month < curr->next_acct->month)) {
+        if ((today->month == curr->month) && (curr->next_acct != NULL) && 
+                (curr->month < curr->next_acct->month)) {
+            *EOM_assets_minus_bills = curr_assets_minus_cc_used;
+            printf("*** End of Month ***\n");
+            EOM_printed = yes;
+        }
+
+        if ((curr->next_acct == NULL) && (EOM_printed == no)) {
+            printf("EOM printed %d\n", EOM_printed);
             *EOM_assets_minus_bills = curr_assets_minus_cc_used;
             printf("*** End of Month ***\n");
         }
