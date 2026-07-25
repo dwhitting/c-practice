@@ -113,7 +113,6 @@ int accts_menu(acct_type_t acct_type);
 #if defined(__APPLE__)
     //printf("In Apple\n");
     #define DOC_PATH "~/Documents"
-    exit(0);
 #elif defined(__linux__)
     //printf("Not in Apple\n");
     #define DOC_PATH "/media/psf/Documents"
