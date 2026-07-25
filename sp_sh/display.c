@@ -172,82 +172,109 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
     char temp_curr_1[STR_NUM_LEN], 
          temp_curr_2[STR_NUM_LEN];  /* used to store all floats converted to string currency */
 
-    acct_type_t acct_income;
-    acct_income.acct_Type = incomeAcct;
-    acct_t *income; 
-    enum EOM_printed { yes, no}
-    EOM_printed = no;
-
-    acct_type_t acct_bill;
-    acct_t *curr;
-    acct_t *prev;
-    acct_t *bill_head;
-    acct_bill.acct_Type = billAcct;
-    acct_t *today = malloc(sizeof(acct_t));
-    get_date(today);
-    sort_by_date(acct_bill, get_acct_head(acct_bill));
-    curr = get_acct_head(acct_bill);
-    bill_head = get_acct_head(acct_bill);
-    prev = curr;
-
     if (ws == AD) {
         printf("\n      Bills:\n");
     } else if (ws == RET) {
         printf("\n (RET)  Bills:\n");
     }
+
+    acct_type_t income_acct = {.acct_Type = incomeAcct};
+    acct_type_t bill_acct = {.acct_Type = billAcct};
+    acct_t *income_head = get_acct_head(income_acct); 
+    acct_t *bill_head = get_acct_head(bill_acct);
+
+    acct_t *today = calloc(1, sizeof(acct_t));
+    get_date(today);
+
+    acct_t *comb = NULL;
+    acct_t *comb_head = NULL;
+
+    acct_t *curr_bill = bill_head;
+
+    while (curr_bill != NULL) {
+        if (comb == NULL) {
+            comb = curr_bill;
+            comb_head = comb;
+        } else {
+            comb->next_acct = curr_bill;
+            comb = comb->next_acct;
+        }
+        curr_bill = curr_bill->next_acct;
+    }
+
+    acct_t *curr_income = income_head;
+
+    while (curr_income != NULL) {
+        comb->next_acct = curr_income;
+        comb = comb->next_acct;
+        curr_income = curr_income->next_acct;
+    }
+
+    sort_by_date(bill_acct, comb);
+    comb = comb_head;
+
+    while (comb != NULL) {
+        float_to_currency(comb->balance, temp_curr_1);
+        //float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
+        printf("%2d %s %4d %-30s%10s, Actual: %s\n",comb->day, month_to_str(comb->month), 
+            comb->year, comb->name, temp_curr_1 /* , temp_curr_2 */);
+        comb = comb->next_acct;
+    }
     
 
-    while (curr != NULL) {
 
 
-        curr_assets_minus_cc_used -= curr->balance;
+    // while (curr != NULL) {
 
-        float_to_currency(curr->balance, temp_curr_1);
-        float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
 
-        if ((curr == bill_head) && (bill_head->date_sort > today->date_sort)) {
-            printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
-        }
+    //     curr_assets_minus_cc_used -= curr->balance;
 
-        printf("%2d %s %4d %-30s%10s, Actual: %s\n",curr->day, month_to_str(curr->month), 
-            curr->year, curr->name, temp_curr_1, temp_curr_2);
+    //     float_to_currency(curr->balance, temp_curr_1);
+    //     float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
 
-        if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
-            printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
-        } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {
-            printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
-        }
-            /* prob unecesary looping that could increase efficency */
-        income = get_acct_head(acct_income); 
-        while (income != NULL) { 
-            if ((((curr == bill_head && curr->date_sort) && curr->date_sort == income->date_sort)) || 
-                ((prev->date_sort < curr->date_sort) && (curr->date_sort == income->date_sort))) {
-                curr_assets_minus_cc_used += income->balance;
+    //     if ((curr == bill_head) && (bill_head->date_sort > today->date_sort)) {
+    //         printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
+    //     }
 
-                float_to_currency(income->balance, temp_curr_1);
-                float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
-                printf("%2d %s %4d %-30s%10s, Actual: %s\n",income->day, month_to_str(income->month), 
-                    income->year, income->name, temp_curr_1, temp_curr_2);
-            }
-            income = income->next_acct;            
-        }
+    //     printf("%2d %s %4d %-30s%10s, Actual: %s\n",curr->day, month_to_str(curr->month), 
+    //         curr->year, curr->name, temp_curr_1, temp_curr_2);
+
+    //     if (curr->next_acct == NULL && curr->date_sort <= today->date_sort) {
+    //         printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
+    //     } else if ((curr->date_sort <= today->date_sort) && (curr->next_acct->date_sort > today->date_sort)) {
+    //         printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);
+    //     }
+    //         /* prob unecesary looping that could increase efficency */
+    //     income = get_acct_head(acct_income); 
+    //     while (income != NULL) { 
+    //         if ((((curr == bill_head && curr->date_sort) && curr->date_sort == income->date_sort)) || 
+    //             ((prev->date_sort < curr->date_sort) && (curr->date_sort == income->date_sort))) {
+    //             curr_assets_minus_cc_used += income->balance;
+
+    //             float_to_currency(income->balance, temp_curr_1);
+    //             float_to_currency(curr_assets_minus_cc_used, temp_curr_2);
+    //             printf("%2d %s %4d %-30s%10s, Actual: %s\n",income->day, month_to_str(income->month), 
+    //                 income->year, income->name, temp_curr_1, temp_curr_2);
+    //         }
+    //         income = income->next_acct;            
+    //     }
         
-        if ((today->month == curr->month) && (curr->next_acct != NULL) && 
-                (curr->month < curr->next_acct->month)) {
-            *EOM_assets_minus_bills = curr_assets_minus_cc_used;
-            printf("*** End of Month ***\n");
-            EOM_printed = yes;
-        }
+    //     if ((today->month == curr->month) && (curr->next_acct != NULL) && 
+    //             (curr->month < curr->next_acct->month)) {
+    //         *EOM_assets_minus_bills = curr_assets_minus_cc_used;
+    //         printf("*** End of Month ***\n");
+    //         EOM_printed = yes;
+    //     }
 
-        if ((curr->next_acct == NULL) && (EOM_printed == no)) {
-            printf("EOM printed %d\n", EOM_printed);
-            *EOM_assets_minus_bills = curr_assets_minus_cc_used;
-            printf("*** End of Month ***\n");
-        }
+    //     if ((curr->next_acct == NULL) && (EOM_printed == no)) {
+    //         printf("EOM printed %d\n", EOM_printed);
+    //         *EOM_assets_minus_bills = curr_assets_minus_cc_used;
+    //         printf("*** End of Month ***\n");
+    //     }
 
-        prev = curr;
-        curr = curr->next_acct;
-    }
+    //     prev = curr;
+    //     curr = curr->next_acct;
+    // }
 
     free(today);
 
