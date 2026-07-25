@@ -111,9 +111,9 @@ int accts_menu(acct_type_t acct_type);
 #endif
 
 #if defined(__APPLE__)
-    //printf("In Apple\n");
     #define DOC_PATH "/Users/drewwhitting/Documents"
 #elif defined(__linux__)
-    //printf("Not in Apple\n");
     #define DOC_PATH "/media/psf/Documents"
+#else
+    #error "Does not seem to be on Mac or Parallels Linux"
 #endif
