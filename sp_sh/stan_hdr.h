@@ -17,7 +17,6 @@
 #define ACCT_NAME_LEN 100
 #define STR_NUM_LEN 20
 #define NOTE_LEN 500
-#define DOC_PATH "/media/psf/Documents"
 
 typedef enum {
     bnkAcct,
@@ -77,7 +76,6 @@ typedef struct _record_t {
 int stan_err(char * in_str);
 char single_char_input(void);
 
-int accts_main(void);
 int bills_menu(void);
 int accts_exit(void);
 void read_raw_line(char *buffer, size_t max_len);
@@ -110,4 +108,13 @@ int save_records(work_status ws);
 int print_accts_menu(acct_type_t acct_type);
 int accts_menu(acct_type_t acct_type);
 
+#endif
+
+#if defined(__APPLE__)
+    //printf("In Apple\n");
+    #define DOC_PATH "~/Documents"
+    exit(0);
+#elif defined(__linux__)
+    //printf("Not in Apple\n");
+    #define DOC_PATH "/media/psf/Documents"
 #endif

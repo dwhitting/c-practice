@@ -4,13 +4,6 @@ work_status ws = AD;
 
 int main() {
 
-#if defined(__APPLE__)
-    printf("In Apple\n");
-    exit(0);
-#elif defined(__linux__)
-    printf("Not in Apple\n");
-#endif
-
     struct stat st;
     if (stat(DOC_PATH, &st) != 0) {
         printf("Does not look like running from Paralles\n");
