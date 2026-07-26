@@ -553,6 +553,18 @@ static int add_acct(acct_type_t acct_type) {
         curr->month = today->month;
         curr->year = today->year;
         curr->date_sort = (10000 * curr->year) + (100 * curr->month) + curr->day; 
+        if (acct_type.acct_Type == bnkAcct) {
+            curr->acctType = bnkAcct;
+        } else if (acct_type.acct_Type == credAcct) {
+            curr->acctType = credAcct;
+        } else if (acct_type.acct_Type == billAcct) {
+            curr->acctType = billAcct;
+        } else if (acct_type.acct_Type == incomeAcct) {
+            curr->acctType = incomeAcct;
+        } else {
+            printf("unrecognized acct type in add_acct\n");
+            exit(0);
+        }
         set_acct_head(acct_type, curr);
     } else {
         while (curr->next_acct != NULL) {
@@ -625,6 +637,7 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->year, sizeof(int));
         write(fd, &curr->date_sort, sizeof(int));
         write(fd, &curr->cred_remain, sizeof(float));
+        write(fd, &curr->acctType, sizeof(AcctType));
     
         curr->next_acct = temp_save;
         curr = curr->next_acct;
@@ -741,6 +754,7 @@ int load_accts(acct_type_t acct_type) {
         read(fd, &node_read->year, sizeof(int));
         read(fd, &node_read->date_sort, sizeof(int));
         read(fd, &node_read->cred_remain, sizeof(float));
+        read(fd, &node_read->acctType, sizeof(AcctType));
 
         node_read->next_acct = NULL;
 

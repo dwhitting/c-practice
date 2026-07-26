@@ -52,6 +52,7 @@ typedef struct _acct_t {
     float cred_remain;
     int date_sort;
     struct _acct_t *next_acct;
+    AcctType acctType;
 } acct_t;
 
 typedef struct _record_t {
@@ -115,7 +116,7 @@ int update_days_out(void);
 #if defined(__APPLE__)
     #define DOC_PATH "/Users/drewwhitting/Documents"
 #elif defined(__linux__)
-    #define DOC_PATH "/media/psf/Documents"
+    #define DOC_PATH "/media/psf/Documents/c_accts"
 #else
     #error "Does not seem to be on Mac or Parallels Linux"
 #endif
