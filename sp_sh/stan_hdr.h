@@ -23,8 +23,7 @@ typedef enum {
     credAcct,
     billAcct,
     incomeAcct,
-    recordAcct,
-    combinedAcct
+    recordAcct
 } AcctType;
 
 typedef enum {

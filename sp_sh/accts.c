@@ -4,7 +4,6 @@ static acct_t *bnk_accts_ll = NULL;
 static acct_t *cc_accts_ll = NULL;
 static acct_t *bill_accts_ll = NULL;
 static acct_t *income_ll = NULL;
-static acct_t *combined_ll = NULL;
 
 static int delete_acct(acct_type_t acct_type);
 static int add_acct(acct_type_t acct_type);
@@ -238,8 +237,6 @@ acct_t *get_acct_head(acct_type_t acct_type) {
         return bill_accts_ll;
     } else if (acct_type.acct_Type == incomeAcct) {
         return income_ll;
-    } else if (acct_type.acct_Type == combinedAcct) {
-        return combined_ll;
     } else {
         stan_err("acct in get_acct_head not recognized");
     }
@@ -255,8 +252,6 @@ int set_acct_head(acct_type_t acct_type, acct_t *input_node) {
         bill_accts_ll = input_node;
     } else if (acct_type.acct_Type == incomeAcct) {
         income_ll = input_node;
-    } else if (acct_type.acct_Type == combinedAcct) {
-        combined_ll = input_node;
     } else {
         stan_err("acct type in set_acct_head not recognized");
     }
@@ -786,12 +781,10 @@ int accts_exit(void) {
     acct_type_t cred = {.acct_Type = credAcct};
     acct_type_t bills = {.acct_Type = billAcct};
     acct_type_t income = {.acct_Type = incomeAcct};
-    acct_type_t combined = {.acct_Type = combinedAcct};
     free_accts(bnk);
     free_accts(cred);
     free_accts(bills);
     free_accts(income);
-    free_accts(combined);
     free_records();
 
     return 0;
