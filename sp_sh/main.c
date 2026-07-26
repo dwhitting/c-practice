@@ -1,6 +1,7 @@
 #include "stan_hdr.h"
 
 work_status ws = AD;
+int days_out = 0;
 
 int main() {
 
@@ -23,6 +24,7 @@ int main() {
         printf("(i) Income\n");
         printf("(d) Display\n");
         printf("(r) Records\n");
+        printf("(n) Days Out\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         
@@ -47,6 +49,8 @@ int main() {
             display_main();
         } else if (ch == 'r') {
             records_menu();
+        } else if (ch == 'n') {
+            update_days_out();
         } else if (ch == 'A') {
             printf("\nSet of AD\n\n");
             save_all_accts();

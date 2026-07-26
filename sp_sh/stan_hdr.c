@@ -236,23 +236,36 @@ float raw_read_float(char *prompt) {
 
 int get_date(acct_t *ret_date) {
     time_t raw_time;
-    struct tm *local_time;
+    struct tm local_time;
+    struct tm *tmp;
     
     /* get epoch time */
     time(&raw_time);
 
     /* convert to local time struct */
-    local_time = localtime(&raw_time);
+    tmp = localtime(&raw_time);
+    local_time = *tmp;
 
-    int day = local_time->tm_mday;
-    int month = local_time->tm_mon + 1;     // offset 0-11 to 1-12
-    int year = local_time->tm_year + 1900;  // offset since 1990
+    local_time.tm_mday += days_out;
+    raw_time = mktime(&local_time);
+
+    int day = local_time.tm_mday;
+    int month = local_time.tm_mon + 1;     // offset 0-11 to 1-12
+    int year = local_time.tm_year + 1900;  // offset since 1990
 
     ret_date->day = day;
     ret_date->month = month;
     ret_date->year = year;
     ret_date->date_sort = (10000 * year) + (100 * month) + day;    
     
+    return 0;
+}
+
+int update_days_out(void) {
+
+    int ud_do = raw_read_int("Enter Days Out: ");
+    days_out = ud_do; 
+
     return 0;
 }
 
