@@ -180,14 +180,15 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
 
     acct_type_t income_acct = {.acct_Type = incomeAcct};
     acct_type_t bill_acct = {.acct_Type = billAcct};
+    acct_type_t comb_acct = {.acct_Type = combinedAcct};
     acct_t *income_head = get_acct_head(income_acct); 
     acct_t *bill_head = get_acct_head(bill_acct);
+    acct_t *comb_head = get_acct_head(comb_acct);
 
     acct_t *today = calloc(1, sizeof(acct_t));
     get_date(today);
 
-    acct_t *comb = NULL;
-    acct_t *comb_head = NULL;
+    acct_t *comb = comb_head;;
 
     acct_t *curr_bill = bill_head;
 
@@ -210,7 +211,9 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
         curr_income = curr_income->next_acct;
     }
 
-    sort_by_date(bill_acct, comb);
+    //set_acct_head(comb_acct, comb_head);
+
+    sort_by_date(comb_acct, comb_head);
     comb = comb_head;
 
     while (comb != NULL) {
