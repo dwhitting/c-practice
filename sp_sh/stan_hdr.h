@@ -114,7 +114,7 @@ int update_days_out(void);
 #endif
 
 #if defined(__APPLE__)
-    #define DOC_PATH "/Users/drewwhitting/Documents"
+    #define DOC_PATH "/Users/drewwhitting/Documents/c_accts"
 #elif defined(__linux__)
     #define DOC_PATH "/media/psf/Documents/c_accts"
 #else
