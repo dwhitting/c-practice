@@ -35,15 +35,21 @@ int main() {
             break;
         } else if (ch == 'b') {
             acct_type.acct_Type = bnkAcct;
+            list_accts(acct_type);
             print_accts_menu(acct_type);
             accts_menu(acct_type);
         } else if (ch == 'c') {
             acct_type.acct_Type = credAcct;
+            list_accts(acct_type);
             print_accts_menu(acct_type);
             accts_menu(acct_type);
         } else if (ch == 'l') {
+            acct_type.acct_Type = billAcct;
+            list_accts(acct_type);
             bills_menu();
         } else if (ch == 'i') {
+            acct_type.acct_Type = incomeAcct;
+            list_accts(acct_type);
             income_menu();
         } else if (ch == 'd') {
             display_main();
