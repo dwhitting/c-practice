@@ -8,7 +8,7 @@ int main() {
     struct stat st;
     if (stat(DOC_PATH, &st) != 0) {
         printf("Does not look like running on a known machine\n");
-        //return 0;
+        exit(0);
     }
 
     load_all_accts();

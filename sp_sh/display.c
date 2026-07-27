@@ -31,7 +31,7 @@ int display_main(void) {
 
     acct_type_t bills_acct_type = {.acct_Type = billAcct};
     float bills_total = total_acct_balance(bills_acct_type);
-    float per_day = -(income_total + bills_total) / days_in_curr_month;
+    float per_day = (income_total - bills_total) / days_in_curr_month;
 
     /* list bills */
     float EOM_assets_minus_bills;
