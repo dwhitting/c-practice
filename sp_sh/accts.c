@@ -25,7 +25,7 @@ int print_accts_menu(acct_type_t acct_type) {
     printf("%-*s", width, "(a) add acct ");
     printf("(d) delete acct\n");
     if (acct_type.acct_Type == bnkAcct) {
-        printf("%-*s", width, "(u) update balance ");
+        printf("%-*s", width, "(b) update balance ");
     }
     printf("(l) list accts\n");
     printf("%-*s", width, "(o) load bnk accts ");
@@ -34,7 +34,7 @@ int print_accts_menu(acct_type_t acct_type) {
         printf("%-*s", width, "(i) update limit");
     }
     if (acct_type.acct_Type == credAcct) {
-        printf("(r) update bal remain\n");
+        printf("(b) update bal remain\n");
     }
     printf("(n) Update acct name\n");
     printf("%-*s", width, "(c) move row up one");
@@ -58,10 +58,11 @@ int accts_menu(acct_type_t acct_type) {
         if (ch == 'd') {
             delete_acct(acct_type);
         }
-        if (ch == 'u') {
+        if ((ch == 'b') && (acct_type.acct_Type == bnkAcct)) {
             update_balance(acct_type, ch);
         }
-        if ((ch == 'i' || ch == 'r') && acct_type.acct_Type == credAcct) {
+        if ((ch == 'i' || ch == 'b') && acct_type.acct_Type == credAcct) {
+            printf("\n");
             update_balance(acct_type, ch);
         }
         if (ch == 'l') {
@@ -100,7 +101,7 @@ int bills_menu(void) {
         printf("\nBills Main Menu:\n");
         printf("(a) Add bill\n");
         printf("(l) List bills\n");
-        printf("(u) Update balance\n");
+        printf("(b) Update balance\n");
         printf("(m) Update month, day, or year\n");
         printf("(n) Update name\n");
         printf("(o) Load bills\n");
@@ -137,7 +138,7 @@ int bills_menu(void) {
         if (ch == 's') {
             save_accts(acct_type);
         }
-        if (ch == 'u') {
+        if (ch == 'b') {
             update_balance(acct_type, ch);
         }
         if (ch == 'd') {
@@ -181,7 +182,7 @@ int income_menu(void) {
         printf("\nIncome Main Menu:\n");
         printf("(a) Add Income\n");
         printf("(l) List Income(s)\n");
-        printf("(u) Update balance\n");
+        printf("(b) Update balance\n");
         printf("(m) Update month, day, or year\n");
         printf("(n) Update name\n");
         printf("(o) Load Income(s)\n");
@@ -214,7 +215,7 @@ int income_menu(void) {
         if (ch == 's') {
             save_accts(acct_type);
         }
-        if (ch == 'u') {
+        if (ch == 'b') {
             update_balance(acct_type, ch);
         }
         if (ch == 'd') {
@@ -288,13 +289,15 @@ static int update_acct_name(acct_type_t acct_type) {
     list_accts(acct_type);
 
     int ud_line = raw_read_int("Enter line number: ");
-    char new_val_s[ACCT_NAME_LEN];
-    raw_read_string("\nEnter new name: ", new_val_s);
 
     acct_t *curr = get_acct_head(acct_type);
     for (int i = 1; i < ud_line; i++) {
         curr = curr->next_acct;
     }
+
+    printf("Current name: %s\n", curr->name);
+    char new_val_s[ACCT_NAME_LEN];
+    raw_read_string("\nEnter new name: ", new_val_s);
     
     strcpy(curr->name, new_val_s);
     
@@ -360,7 +363,7 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
 
     list_accts(acct_type);
 
-    int ud_line = raw_read_int("Enter number to update: ");
+    int ud_line = raw_read_int("\nEnter number to update: ");
 
     if (ud_line < 1 || ud_line > total_nodes) {
         printf("\nSelection out of range\n");
@@ -378,12 +381,12 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         }
     } 
 
-    if (menu_sel == 'u') {
+    if ((acct_type.acct_Type == bnkAcct || acct_type.acct_Type == incomeAcct) && menu_sel == 'b') {
         curr->balance = new_bal_f;
-    } else if (menu_sel == 'i') {
+    } else if (acct_type.acct_Type == credAcct && menu_sel == 'i') {
         curr->cred_lim = new_bal_f;
         curr->balance = curr->cred_lim - curr->cred_remain;
-    } else if (menu_sel == 'r') {
+    } else if (acct_type.acct_Type == credAcct && menu_sel == 'b') {
         curr->cred_remain = new_bal_f;
         curr->balance = curr->cred_lim - curr->cred_remain;
     }
@@ -467,14 +470,20 @@ int list_accts(acct_type_t acct_type) {
         
     if (acct_type.acct_Type == bnkAcct) {
         curr = bnk_accts_ll;
+        printf("\n       Acct          Balance\n");
+        printf("-----------------------------------------");
     } else if (acct_type.acct_Type == credAcct) {
         curr = cc_accts_ll;
         printf("\n       Acct              Balance        Remaining      Limit\n");
         printf("----------------------------------------------------------------");
     } else if (acct_type.acct_Type == billAcct) {
         curr = bill_accts_ll;        
+        printf("\n       Date                   Acct               Balance\n");
+        printf("----------------------------------------------------------------------------");
     } else if (acct_type.acct_Type == incomeAcct) {
         curr = income_ll;
+        printf("\n       Date         Acct      Balance\n");
+        printf("---------------------------------------------------------");
     }
 
     if (curr == NULL) {
@@ -490,7 +499,7 @@ int list_accts(acct_type_t acct_type) {
     while (curr != NULL) {
         if (acct_type.acct_Type == bnkAcct) {
             float_to_currency(curr->balance, s_temp);
-            printf("<%d> %-14s bal: %s\n",idx++,  curr->name, s_temp);
+            printf("<%d> %-14s %s\n",idx++,  curr->name, s_temp);
         } else if (acct_type.acct_Type == credAcct) {
             curr->balance = curr->cred_lim - curr->cred_remain;
             float_to_currency(curr->balance, s_temp);
@@ -506,7 +515,7 @@ int list_accts(acct_type_t acct_type) {
         } else if (acct_type.acct_Type == incomeAcct) {
             char *mon = month_to_str(curr->month);
             float_to_currency(curr->balance, s_temp);
-            printf("<%2d> %2d %s %4d %-30s %s\n",idx++, curr->day, mon, curr->year, curr->name, 
+            printf("<%2d> %2d %s %4d %-14s %s\n",idx++, curr->day, mon, curr->year, curr->name, 
                 s_temp);      
         } 
         
