@@ -327,8 +327,6 @@ static int update_cred_date(acct_type_t acct_type) {
         return 0;
     }
 
-    int new_bal_i = raw_read_int("\nEnter new value: ");
-
     acct_t *curr = get_acct_head(acct_type);
 
     if (ud_line > 1) {
@@ -336,6 +334,11 @@ static int update_cred_date(acct_type_t acct_type) {
             curr = curr->next_acct;
         }
     } 
+
+    char mon[STR_NUM_LEN];
+    strcpy(mon, month_to_str(curr->month));
+    printf("Acct: %s %d %s %d\n", curr->name, curr->day, mon, curr->year);
+    int new_bal_i = raw_read_int("\nEnter new value: ");
 
     if (day_or_month == 'd') {
         curr->day = new_bal_i;
@@ -371,8 +374,6 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         return 0;
     }
 
-    float new_bal_f = raw_read_float("Enter new balance: ");
-
     acct_t *curr = get_acct_head(acct_type);
 
     if (ud_line > 1) {
@@ -381,7 +382,13 @@ static int update_balance(acct_type_t acct_type, char menu_sel) {
         }
     } 
 
-    if ((acct_type.acct_Type == bnkAcct || acct_type.acct_Type == incomeAcct) && menu_sel == 'b') {
+    char s_temp[STR_NUM_LEN];
+    float_to_currency(curr->balance, s_temp);
+    printf("Bill: %s %s\n", curr->name, s_temp);
+    float new_bal_f = raw_read_float("Enter new balance: ");
+
+    if ((acct_type.acct_Type == bnkAcct || acct_type.acct_Type == incomeAcct || 
+            acct_type.acct_Type == billAcct) && menu_sel == 'b') {
         curr->balance = new_bal_f;
     } else if (acct_type.acct_Type == credAcct && menu_sel == 'i') {
         curr->cred_lim = new_bal_f;

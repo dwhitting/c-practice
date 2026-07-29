@@ -35,7 +35,7 @@ int display_main(void) {
 
     /* list bills */
     float EOM_assets_minus_bills;
-    list_bills(&EOM_assets_minus_bills, (assets_total- cc_used_total));
+    list_bills(&EOM_assets_minus_bills, (assets_total - cc_used_total));
 
     float_to_currency(bills_total, s_temp);
     printf("\nTotal Bills: %s\n", s_temp);

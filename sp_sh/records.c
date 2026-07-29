@@ -9,7 +9,7 @@ static int sort_reccs_by_date(void);
 static int delete_record(void);
 static int num_records(void);
 static int select_record_line(void);
-static int update_current_EOM(void);
+static int mod_day_change(void);
 static int update_record_date(void);
 static int full_list_records(void);
 
@@ -18,7 +18,7 @@ int records_menu(void) {
     while (1) {
         printf("\nRecords Main Menu:\n");
         printf("(l) List Record(s)\n");
-        printf("(u) Update Current EOM\n");
+        printf("(b) Update Day Change (if per day changed)\n");
         printf("(m) Update Month, Day, or Year\n");
         printf("(o) Load Record(s)\n");
         printf("(t) Update Note\n");
@@ -51,8 +51,8 @@ int records_menu(void) {
         if (ch == 's') {
             save_records(ws);
         }
-        if (ch == 'u') {
-            update_current_EOM();
+        if (ch == 'b') {
+            mod_day_change();
         }
         if (ch == 'd') {
             delete_record();
@@ -139,11 +139,12 @@ int add_record(record_t *new_record) {
     return 0;
 }
 
-static int update_current_EOM(void) {
+static int mod_day_change(void) {
 
     int sel_line = select_record_line();
     
-    if (sel_line == 0) {
+    if (sel_line == 0 || sel_line == -1) {
+        printf("Exiting mod_day_change\n");
         return 0;
     }
 
@@ -154,10 +155,14 @@ static int update_current_EOM(void) {
         curr = curr->next_rec;
     }
 
-    int new_bal_i = raw_read_int("\nEnter new value: ");
-    curr->EOM_assets_minus_bills = new_bal_i;
+    char s_temp[STR_NUM_LEN];
+    float_to_currency(curr->day_change, s_temp);
+    printf("Current per day: %s\n", s_temp);
 
-    printf("Value updated\n");
+    int new_bal_f = raw_read_float("\nEnter new value: ");
+    curr->day_change = new_bal_f;
+
+    printf("Day change updated\n");
 
     return 0;
 }
@@ -167,7 +172,7 @@ static int select_record_line(void) {
     int total_nodes = num_records();
     if (total_nodes == 0) {
         printf("\nNo records to select\n");
-        return 0;
+        return -1;
     }
 
     list_records();
@@ -175,7 +180,7 @@ static int select_record_line(void) {
 
     if (sel_line < 1 || sel_line > total_nodes) {
         printf("\nSelection out of range\n");
-        return 0;
+        return -1;
     }
 
     return sel_line;
