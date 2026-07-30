@@ -45,6 +45,13 @@ int display_main(void) {
 
     float_to_currency(per_day, s_temp);
     printf("Per Day: %s\n", s_temp);
+    float_to_currency(per_day * 7, s_temp);
+    printf("Per Week: %s\n", s_temp);
+    float day_spend = 70.0;
+    float_to_currency((per_day - day_spend) *7, s_temp);
+    printf("After $70 spent per day (7d) %s\n", s_temp);
+    float_to_currency((per_day - day_spend) * 30, s_temp);
+    printf("After $70 spent per day (30d): %s\n", s_temp);
 
     acct_t *today = malloc(sizeof(acct_t));
     get_date(today);
