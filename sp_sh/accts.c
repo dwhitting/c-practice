@@ -653,6 +653,21 @@ static int save_accts(acct_type_t acct_type) {
         write(fd, &curr->year, sizeof(int));
         write(fd, &curr->date_sort, sizeof(int));
         write(fd, &curr->cred_remain, sizeof(float));
+
+        /* may not be necessary once they are all prem saved */
+        if (acct_type.acct_Type == bnkAcct) {
+            curr->acctType = bnkAcct;
+        } else if (acct_type.acct_Type == credAcct) {
+            curr->acctType = credAcct;
+        } else if (acct_type.acct_Type == billAcct) {
+            curr->acctType = billAcct;
+        } else if (acct_type.acct_Type == incomeAcct) {
+            curr->acctType = incomeAcct;
+        } else {
+            printf("Error setting bill type in save\n");
+            exit(0);
+        }
+
         write(fd, &curr->acctType, sizeof(AcctType));
     
         curr->next_acct = temp_save;

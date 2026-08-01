@@ -218,7 +218,12 @@ static int list_bills(float *EOM_assets_minus_bills, float curr_assets_minus_cc_
     qsort(comb_arr, comb_cnt, sizeof(acct_t *), compare_by_date);
 
     for (int i = 0; i < comb_cnt; i++) {
-        curr_assets_minus_cc_used -= comb_arr[i]->balance;
+        if (comb_arr[i]->acctType == incomeAcct) {
+            curr_assets_minus_cc_used += comb_arr[i]->balance;
+        } else {
+            curr_assets_minus_cc_used -= comb_arr[i]->balance;
+        }
+        
 
         if (i == 0 && comb_arr[i]->date_sort > today->date_sort) {
             printf("*** TODAY: %2d %s %4d ***\n", today->day, month_to_str(today->month), today->year);

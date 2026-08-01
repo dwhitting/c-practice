@@ -340,6 +340,8 @@ static int update_day_change(void) {
     return 0;
 }
 
+
+
 static float total_day_change(void) {
 
     record_t*curr;
