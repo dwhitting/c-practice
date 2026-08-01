@@ -17,6 +17,12 @@
 #define ACCT_NAME_LEN 100
 #define STR_NUM_LEN 20
 #define NOTE_LEN 500
+#define CSV_READ_LEN 300
+
+typedef enum {
+    FALSE,
+    TRUE
+} bool;
 
 typedef enum {
     bnkAcct,
@@ -75,6 +81,11 @@ typedef struct _record_t {
 
 } record_t;
 
+typedef struct _csv_line_t {
+    char csv_entry[CSV_READ_LEN];
+    struct _csv_line_t *next_rec;
+} csv_line_t;
+
 int stan_err(char * in_str);
 char single_char_input(void);
 
@@ -110,6 +121,7 @@ int save_records(work_status ws);
 int print_accts_menu(acct_type_t acct_type);
 int accts_menu(acct_type_t acct_type);
 int update_days_out(void);
+int csv_main(void);
 
 #endif
 

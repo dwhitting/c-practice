@@ -25,6 +25,7 @@ int main() {
         printf("(d) Display\n");
         printf("(r) Records\n");
         printf("(n) Days Out\n");
+        printf("(v) CSV\n");
         printf("(q) Quit\n");
         printf("\nEnter selection: ");
         
@@ -69,6 +70,8 @@ int main() {
             accts_exit();
             ws = RET;
             load_all_accts();
+        } else if (ch == 'v') {
+            csv_main();
         }
     }
     
