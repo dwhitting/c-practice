@@ -81,10 +81,24 @@ typedef struct _record_t {
 
 } record_t;
 
-typedef struct _csv_line_t {
+typedef struct _csv_str_line_t {
     char csv_entry[CSV_READ_LEN];
-    struct _csv_line_t *next_rec;
-} csv_line_t;
+    struct _csv_str_line_t *next_rec;
+} csv_str_line_t;
+
+typedef struct _csv_node_t {
+    int trans_day;
+    Month trans_month;
+    int trans_year;
+
+    struct _csv_node_t *next_node;
+} csv_node_t;
+
+typedef struct {
+    int day;
+    Month month;
+    int year;
+} date_t;
 
 int stan_err(char * in_str);
 char single_char_input(void);
