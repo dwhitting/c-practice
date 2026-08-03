@@ -95,9 +95,9 @@ typedef struct _csv_node_t {
 } csv_node_t;
 
 typedef struct {
-    int day;
+    long day;
     Month month;
-    int year;
+    long year;
 } date_t;
 
 int stan_err(char * in_str);
