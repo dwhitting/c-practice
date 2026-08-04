@@ -308,6 +308,14 @@ static int update_cred_date(acct_type_t acct_type) {
 
     list_accts(acct_type);
 
+    long ud_line = raw_read_long("Enter number to update: ");
+
+    int total_nodes = num_ll(acct_type);
+    if (ud_line < 1 || ud_line > total_nodes) {
+        printf("\nSelection out of range\n");
+        return 0;
+    }
+
     char day_or_month;
     printf("(d) Day or (m) Month (y) Year: ");
     fflush(stdout);
@@ -318,14 +326,6 @@ static int update_cred_date(acct_type_t acct_type) {
         }
     }
     printf("char: %c\n", day_or_month);
-
-    long ud_line = raw_read_long("Enter number to update: ");
-
-    int total_nodes = num_ll(acct_type);
-    if (ud_line < 1 || ud_line > total_nodes) {
-        printf("\nSelection out of range\n");
-        return 0;
-    }
 
     acct_t *curr = get_acct_head(acct_type);
 
