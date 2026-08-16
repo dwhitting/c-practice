@@ -5,6 +5,7 @@ static int csv_to_text_lines(int *line_count);
 static int free_csv_str_ll(void);
 static date_t process_date_str(char date_str[20]);
 static int parse_csv_line(char line_str[CSV_READ_LEN]);
+static int comma_posits(int *in_arr, char line_str[CSV_READ_LEN]);
 
 int csv_main(void) {
 
@@ -13,9 +14,11 @@ int csv_main(void) {
     csv_to_text_lines(&line_count);
     csv_str_line_t *curr = csv_string_linked_list;
 
-    while (curr != NULL) {
+    int while_cntr = 0;
+    while ((curr != NULL) && (while_cntr < 10)) {
         parse_csv_line(curr->csv_entry);
         curr = curr->next_rec;
+        while_cntr++;
     }
     
     curr = csv_string_linked_list;
@@ -47,6 +50,16 @@ static int parse_csv_line(char line_str[CSV_READ_LEN]) {
         return -1;
     }
 
+    int comma_array[20];
+    memset(comma_array, 0, sizeof(comma_array));
+    comma_posits(comma_array, line_str);
+
+    for (int i = 0; i < 20; i++) {
+        printf("%d, ", comma_array[i]);
+    }
+
+    return 0;
+
     /* parse string for date */
     char ch = '\0';
     int char_cnt = 0;
@@ -68,6 +81,30 @@ static int parse_csv_line(char line_str[CSV_READ_LEN]) {
     }
 
     printf("%d\n", char_cnt);
+
+    return 0;
+}
+
+static int comma_posits(int *in_arr, char line_str[CSV_READ_LEN]) {
+
+    char ch = '\0';
+    int char_cnt = 0;
+    int comma_count = 0;
+
+    while (char_cnt < CSV_READ_LEN && ch != '\r') {
+        ch = '\0';
+
+        printf("%s\n", line_str);
+        while (ch != ',') {
+            ch = line_str[char_cnt++];
+        }
+        in_arr[comma_count++] = char_cnt++;
+
+        if (ch = '\r')
+            printf("hit r\n");
+
+    }
+    in_arr[comma_count] = char_cnt;
 
     return 0;
 }
